@@ -2,7 +2,7 @@ do_package_checks()
 
 if (Sys.getenv("DEV_VERSIONS") != "") {
   get_stage("install") %>%
-    add_step(step_install_github("facebook/prophet", subdir = "R"))
+    add_step(step_install_cran("bsts", subdir = "R"))
 }
 
 if (Sys.getenv("BUILD_PKGDOWN") != "" && ci()$get_branch() == "master") {
