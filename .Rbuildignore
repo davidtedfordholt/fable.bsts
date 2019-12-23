@@ -3,7 +3,7 @@
 ^README\.Rmd$
 ^fable\.Rproj$
 ^\.Rproj\.user$
-fable.prophet.Rproj
+fable.bsts.Rproj
 ^codecov\.yml$
 ^appveyor\.yml$
 ^tic\.R$
