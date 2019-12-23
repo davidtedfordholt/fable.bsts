@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# fable.prophet
+# fable.bsts
 
 [![Travis build
 status](https://travis-ci.org/mitchelloharawild/fable.prophet.svg?branch=master)](https://travis-ci.org/mitchelloharawild/fable.prophet)
@@ -11,17 +11,17 @@ coverage](https://codecov.io/gh/mitchelloharawild/fable.prophet/branch/master/gr
 
 This package provides a tidy R interface to the prophet forecasting
 procedure using [fable](https://github.com/tidyverts/fable). This
-package makes use of the [prophet
-package](https://cran.r-project.org/package=prophet) for R.
+package makes use of the [bsts
+package](https://cran.r-project.org/package=bsts) for R.
 
 ## Installation
 
-You can install the development version of fable.prophet from
-[Github](https://github.com/mitchelloharawild/fable.prophet) with:
+You can install the development version of fable.bsts from
+[Github](https://github.com/davidtedfordholt/fable.bsts) with:
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("mitchelloharawild/fable.prophet")
+remotes::install_github("davidtedfordholt/fable.bsts")
 ```
 
 ## Example
