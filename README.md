@@ -47,7 +47,7 @@ term. A piecewise linear trend is included by default, and so it is not
 included in the model specification below.
 
 ``` r
-library(fable.prophet)
+library(fable.bsts)
 #> Loading required package: Rcpp
 #> Loading required package: fabletools
 fit <- cafe %>% 
