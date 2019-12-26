@@ -5,9 +5,9 @@
 globalVariables("self")
 
 #' @importFrom stats predict
-train_prophet <- function(.data, specials, ...){
+train_bsts <- function(.data, specials, ...){
   if(length(tsibble::measured_vars(.data)) > 1){
-    abort("Only univariate responses are supported by Prophet")
+    abort("Only univariate responses are supported by bsts")
   }
 
   # Prepare data for modelling
