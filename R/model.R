@@ -12,6 +12,7 @@ train_bsts <- function(.data, specials, ...){
 
   # Prepare data for modelling
   model_data <- as_tibble(.data)[c(expr_text(index(.data)), measured_vars(.data))]
+  xts_data <- xts::xts(x = .data[measured_vars(.data)], order.by = .data[expr_text(index(.data))])
   vec_data <- model_data %>% pull(measured_vars(.data))
 
   # Initialize state specification
@@ -51,22 +52,20 @@ train_bsts <- function(.data, specials, ...){
 
   # Train model
   mdl <- bsts::bsts(
-    model_data
-    state.specification = state
+    state.specification = state,
+    family = family,
+    data = xts_data,
+    niter = iterations
   )
-
-  # Train model
-  mdl <- prophet::fit.prophet(mdl, model_data, ...)
-  mdl$uncertainty.samples <- 0
   fits <- predict(mdl, model_data)
 
   # Return model
   structure(
     list(
       model = mdl,
-      est = list(.fitted = fits$yhat, .resid = model_data[["y"]] - fits$yhat),
-      components = .data %>% mutate(!!!(fits[c("additive_terms", "multiplicative_terms", "trend", names(mdl$seasonalities))]))),
-    class = "fbl_prophet")
+      est = list(.fitted = fits$yhat, .resid = vec_data - fits$yhat),
+      components = .data %>% mutate(!!!(fits[c("trend", names(mdl$seasonalities))]))),
+    class = "fbl_bsts")
 }
 
 specials_bsts <- new_specials(
