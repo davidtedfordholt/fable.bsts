@@ -185,7 +185,7 @@ specials_bsts <- new_specials(
 #' library(dplyr)
 #' tsibbledata::aus_production %>%
 #'   model(
-#'     bsts = bsts(Beer ~ season("year", 4, type = "multiplicative"))
+#'     bsts = BSTS(Beer ~ season("year"))
 #'   )
 #' }
 #'
@@ -195,11 +195,10 @@ BSTS <- function(formula, ...){
   new_model_definition(bsts_model, !!enquo(formula), ...)
 }
 
-#' Produce forecasts from the prophet model
+#' Produce forecasts from the bsts model
 #'
-#' If additional future information is required (such as exogenous variables or
-#' carrying capacities) by the model, then they should be included as variables
-#' of the `new_data` argument.
+#' If additional future information is required (such as exogenous variables)
+#' by the model, then they should be included as variables of the `new_data` argument.
 #'
 #' @inheritParams fable::forecast.ARIMA
 #' @param ... Additional arguments passed to [`bsts::predict.bsts()`].
@@ -215,7 +214,7 @@ BSTS <- function(formula, ...){
 #' library(dplyr)
 #' tsibbledata::aus_production %>%
 #'   model(
-#'     prophet = prophet(Beer ~ season("year", 4, type = "multiplicative"))
+#'     bsts = BSTS(Beer ~ season("year"))
 #'   ) %>%
 #'   forecast()
 #' }
