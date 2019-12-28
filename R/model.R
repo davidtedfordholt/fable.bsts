@@ -17,6 +17,7 @@ train_bsts <- function(.data, specials, ...){
 
   # Initialize state specification
   state <- list()
+  prior <- SdPrior(sigma.guess = sd(vec_data))
 
   # Trend
   trend <- specials$trend[[1]]
