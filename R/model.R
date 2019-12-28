@@ -174,10 +174,9 @@ specials_bsts <- new_specials(
 #' }
 #'
 #' @seealso
-#' - [`prophet::prophet()`]
-#' - [Prophet homepage](https://facebook.github.io/prophet/)
-#' - [Prophet R package](https://CRAN.R-project.org/package=prophet)
-#' - [Prophet Python package](https://pypi.org/project/fbprophet/)
+#' - [`bsts::bsts()`]
+#' - [bsts homepage](https://sites.google.com/view/stevethebayesian/software)
+#' - [bsts R package](https://CRAN.R-project.org/package=bsts)
 #'
 #' @examples
 #'
