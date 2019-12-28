@@ -12,30 +12,24 @@ train_bsts <- function(.data, specials, ...){
 
   # Prepare data for modelling
   model_data <- as_tibble(.data)[c(expr_text(index(.data)), measured_vars(.data))]
-  colnames(model_data) <- c("ds", "y")
+  vec_data <- model_data %>% pull(measured_vars(.data))
 
-  # Growth
-  growth <- specials$growth[[1]]
-  model_data$cap <- growth$capacity
-  model_data$floor <- growth$floor
+  # Initialize state specification
+  state <- list()
+
+  # Trend
+  trend <- specials$trend[[1]]
+  model_data$trend_type <- trend$type
+  if (trend$type == "linear") {
+    state <- bsts::AddLocalLinearTrend(state.specification = state, y = vec_data)
+  } else if (trend$type == "semilocal") {
+    state <- bsts::AddSemilocalLinearTrend(state.specification = state, y = vec_data)
+  } else if (trend$type == "level") {
+    state <- bsts::AddLocalLevel(state.specification = state, y = vec_data)
+  }
 
   # Holidays
   holiday <- specials$holiday[[1]]
-
-  # Build model
-  mdl <- prophet::prophet(
-    growth = growth$type,
-    changepoints = growth$changepoints,
-    n.changepoints = growth$n_changepoints,
-    changepoint.range = growth$changepoint_range,
-    changepoint.prior.scale = growth$changepoint_prior_scale,
-    holidays = holiday$holidays,
-    holidays.prior.scale = holiday$prior_scale,
-    yearly.seasonality = is.name(self$formula),
-    weekly.seasonality = is.name(self$formula),
-    daily.seasonality = is.name(self$formula),
-    uncertainty_samples = 0
-  )
 
   # Seasonality
   for (season in specials$season){
@@ -54,6 +48,12 @@ train_bsts <- function(.data, specials, ...){
         standardize = regressor$standardize, mode = regressor$mode)
     }
   }
+
+  # Train model
+  mdl <- bsts::bsts(
+    model_data
+    state.specification = state
+  )
 
   # Train model
   mdl <- prophet::fit.prophet(mdl, model_data, ...)
@@ -156,7 +156,7 @@ specials_bsts <- new_specials(
 #' }
 #'
 #' \tabular{ll}{
-#'   `holidays`    \tab A [`tsibble`](https://tsibble.tidyverts.org/) containing a set of holiday events. The event name is given in the 'holiday' column, and the event date is given via the index. Additionally, "lower_window" and "upper_window" columns can be used to include days before and after the holiday.\cr
+#'   `holidays`   \tab A [`tsibble`](https://tsibble.tidyverts.org/) containing a set of holiday events. The event name is given in the 'holiday' column, and the event date is given via the index. Additionally, "lower_window" and "upper_window" columns can be used to include days before and after the holiday.\cr
 #' }
 #' }
 #'
