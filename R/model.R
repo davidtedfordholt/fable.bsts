@@ -69,13 +69,8 @@ train_bsts <- function(.data, specials, ...){
     class = "fbl_prophet")
 }
 
-specials_prophet <- new_specials(
-  growth = function(type = c("linear", "logistic"),
-                   capacity = NULL, floor = NULL,
-                   changepoints = NULL, n_changepoints = 25,
-                   changepoint_range = 0.8, changepoint_prior_scale = 0.05){
-    capacity <- eval_tidy(enquo(capacity), data = self$data)
-    floor <- eval_tidy(enquo(floor), data = self$data)
+specials_bsts <- new_specials(
+  trend = function(type = c("local", "semilocal")){
     type <- match.arg(type)
     as.list(environment())
   },
