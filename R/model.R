@@ -82,7 +82,6 @@ specials_bsts <- new_specials(
     if (!nseasons %in% periods) abort("period for seasonality is not correctly specified")
     as.list(environment())
   },
-
   xreg = function(..., prior_scale = NULL, standardize = "auto", type = NULL){
     model_formula <- new_formula(
       lhs = NULL,
@@ -98,23 +97,23 @@ specials_bsts <- new_specials(
   .required_specials = c("growth", "holiday")
 )
 
-#' Prophet procedure modelling
+#' bsts procedure modelling
 #'
-#' Prepares a prophet model specification for use within the `fable` package.
+#' Prepares a bsts model specification for use within the `fable` package.
 #'
-#' The prophet modelling interface uses a `formula` based model specification
+#' The bsts modelling interface uses a `formula` based model specification
 #' (`y ~ x`), where the left of the formula specifies the response variable,
 #' and the right specifies the model's predictive terms. Like any model in the
 #' fable framework, it is possible to specify transformations on the response.
 #'
-#' A prophet model supports piecewise linear or exponential growth (trend),
-#' additive or multiplicative seasonality, holiday effects and exogenous
-#' regressors. These can be specified using the 'specials' functions detailed
+#' A bsts model supports local linear and semi-local linear trends, local levels
+#' with a random walk trend, additive seasonality and exogenous regressors.
+#' These can be specified using the 'specials' functions detailed
 #' below. The introduction vignette provides more details on how to model data
-#' using this interface to prophet: `vignette("intro", package="fable.prophet")`.
+#' using this interface to prophet: `vignette("intro", package="fable.bsts")`.
 #'
 #' @param formula A symbolic description of the model to be fitted of class `formula`.
-#' @inheritParams prophet::fit.prophet
+#' @inheritParams bsts::bsts
 #'
 #' @section Specials:
 #'
