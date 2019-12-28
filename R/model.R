@@ -220,13 +220,13 @@ BSTS <- function(formula, ...){
 #' }
 #'
 #' @export
-forecast.fbl_prophet <- function(object, new_data, specials = NULL, times = 1000, ...){
+forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 1000, ...){
   mdl <- object$model
 
   # Prepare data
   new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
 
-  ## Growth
+  ## trend
   growth <- specials$growth[[1]]
   if(!is.null(growth$capacity)){
     new_data$cap <- growth$capacity
@@ -247,7 +247,7 @@ forecast.fbl_prophet <- function(object, new_data, specials = NULL, times = 1000
   pred <- predict(mdl, new_data)
 
   # Simulate future paths
-  mdl$uncertainty.samples <- times
+  mdl$niter <- iterations
   sim <- prophet::predictive_samples(mdl, new_data, ...)$yhat
   sim <- split(sim, row(sim))
 
