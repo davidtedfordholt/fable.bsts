@@ -42,13 +42,12 @@ train_bsts <- function(.data, specials, ...){
   #   for(nm in colnames(regressor$xreg)){
   #     model_data[nm] <- regressor$xreg[,nm]
   #     state <- bsts::AddDynamicRegression(
-  #       state, name = nm, prior.scale = regressor$prior_scale,
-  #       standardize = regressor$standardize, mode = regressor$mode)
+  #       state, name = nm, )
   #   }
   # }
 
   # Train model
-  model <- bsts::bsts(
+  mdl <- bsts::bsts(
     state.specification = state,
     family = family,
     data = xts_data,
