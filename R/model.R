@@ -284,12 +284,10 @@ residuals.fbl_bsts <- function(object, ...){
 
 #' Extract meaningful components
 #'
-#' A prophet model consists of terms which are additively or multiplicatively
-#' included in the model. Multiplicative terms are scaled proportionally to the
-#' estimated trend, while additive terms are not.
+#' A bsts model consists of terms which are additively included in the model.
 #'
-#' Extracting a prophet model's components using this function allows you to
-#' visualise the components in a similar way to [`prophet::prophet_plot_components()`].
+#' Extracting a bsts model's components using this function allows you to
+#' visualise the components in a similar way to [`bsts::plotBstsComponents()`].
 #'
 #' @inheritParams fable::components.ETS
 #'
@@ -302,7 +300,7 @@ residuals.fbl_bsts <- function(object, ...){
 #' library(dplyr)
 #' beer_components <- tsibbledata::aus_production %>%
 #'   model(
-#'     prophet = prophet(Beer ~ season("year", 4, type = "multiplicative"))
+#'     bsts = BSTS(Beer ~ season("year"))
 #'   ) %>%
 #'   components()
 #'
@@ -320,11 +318,11 @@ residuals.fbl_bsts <- function(object, ...){
 #' }
 #'
 #' @export
-components.fbl_prophet <- function(object, ...){
+components.fbl_bsts <- function(object, ...){
   cmp <- object$components
   cmp$.resid <- object$est$.resid
   mv <- measured_vars(cmp)
-  as_dable(cmp, resp = !!sym(mv[1]), method = "Prophet",
+  as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
            aliases = set_names(
              list(expr(!!sym("trend") * (1 + !!sym("multiplicative_terms")) + !!sym("additive_terms") + !!sym(".resid"))),
              mv[1]
