@@ -84,6 +84,10 @@ specials_bsts <- new_specials(
   },
   holiday = function(holiday.list = NULL) {
 
+    # holidays have to be specified with the holiday function, and they need the same
+    # amount of dats before and after in a set, so they need to be parsed from the
+    # list given in the manner that prophet allows.
+
   },
   xreg = function(..., prior_scale = NULL, standardize = "auto", type = NULL){
     model_formula <- new_formula(
@@ -97,7 +101,7 @@ specials_bsts <- new_specials(
       mode = type
     )
   },
-  .required_specials = c("growth", "holiday")
+  .required_specials = c("trend", "season")
 )
 
 #' bsts procedure modelling
@@ -148,12 +152,11 @@ specials_bsts <- new_specials(
 #' \subsection{holiday}{
 #' The `holiday` special is used to specify a `tsibble` containing holidays for the model.
 #' \preformatted{
-#' holiday(holidays = NULL, prior_scale = 10L)
+#' holiday(holidays = NULL)
 #' }
 #'
 #' \tabular{ll}{
 #'   `holidays`    \tab A [`tsibble`](https://tsibble.tidyverts.org/) containing a set of holiday events. The event name is given in the 'holiday' column, and the event date is given via the index. Additionally, "lower_window" and "upper_window" columns can be used to include days before and after the holiday.\cr
-#'   `prior_scale` \tab Used to control the amount of regularisation applied. Reducing this will dampen the holiday effect.\cr
 #' }
 #' }
 #'
@@ -166,9 +169,7 @@ specials_bsts <- new_specials(
 #'
 #' \tabular{ll}{
 #'   `...`         \tab A set of bare expressions that are evaluated as exogenous regressors\cr
-#'   `prior_scale` \tab Used to control the amount of regularisation applied. Reducing this will dampen the regressor effect.\cr
 #'   `standardize` \tab Should the regressor be standardised before fitting? If "auto", it will standardise if the regressor is not binary.\cr
-#'   `type`        \tab Does the effect of the regressor vary proportionally to the level of the series? If so, "multiplicative" is best. Otherwise, use "additive"\cr
 #' }
 #' }
 #'
