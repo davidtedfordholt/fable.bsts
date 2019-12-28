@@ -117,22 +117,14 @@ specials_bsts <- new_specials(
 #'
 #' @section Specials:
 #'
-#' \subsection{growth}{
-#' The `growth` special is used to specify the trend parameters.
+#' \subsection{trend}{
+#' The `trend` special is used to specify the trend parameters.
 #' \preformatted{
-#' growth(type = c("linear", "logistic"), capacity = NULL, floor = NULL,
-#'        changepoints = NULL, n_changepoints = 25, changepoint_range = 0.8,
-#'        changepoint_prior_scale = 0.05)
+#' trend(type = c("locallinear", "semilocallinear", "locallevel"))
 #' }
 #'
 #' \tabular{ll}{
-#'   `type`                    \tab The type of trend (linear or logistic).\cr
-#'   `capacity`                \tab The carrying capacity for when `type` is "logistic".\cr
-#'   `floor`                   \tab The saturating minimum for when `type` is "logistic".\cr
-#'   `changepoints`            \tab A vector of dates/times for changepoints. If `NULL`, changepoints are automatically selected.\cr
-#'   `n_changepoints`          \tab The total number of changepoints to be selected if `changepoints` is `NULL`\cr
-#'   `changepoint_range`       \tab Proportion of the start of the time series where changepoints are automatically selected.\cr
-#'   `changepoint_prior_scale` \tab Controls the flexibility of the trend.
+#'   `type`                    \tab The type of trend (local linear, semi-local linear or local level).\cr
 #' }
 #' }
 #'
