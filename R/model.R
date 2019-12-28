@@ -70,7 +70,7 @@ train_bsts <- function(.data, specials, ...){
 }
 
 specials_bsts <- new_specials(
-  trend = function(type = c("locallinear", "semilocallinear", "locallevel")){
+  trend = function(type = c("linear", "semilocal", "level")){
     type <- match.arg(type)
     as.list(environment())
   },
@@ -82,25 +82,25 @@ specials_bsts <- new_specials(
     if (!nseasons %in% periods) abort("period for seasonality is not correctly specified")
     as.list(environment())
   },
-  holiday = function(holiday.list = NULL) {
-
-    # holidays have to be specified with the holiday function, and they need the same
-    # amount of dats before and after in a set, so they need to be parsed from the
-    # list given in the manner that prophet allows.
-
-  },
-  xreg = function(..., prior_scale = NULL, standardize = "auto", type = NULL){
-    model_formula <- new_formula(
-      lhs = NULL,
-      rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
-    )
-    list(
-      xreg = model.matrix(model_formula, self$data),
-      prior_scale = prior_scale,
-      standardize = standardize,
-      mode = type
-    )
-  },
+  # holiday = function(holiday.list = NULL) {
+  #
+  #   # holidays have to be specified with the holiday function, and they need the same
+  #   # amount of dats before and after in a set, so they need to be parsed from the
+  #   # list given in the manner that prophet allows.
+  #
+  # },
+  # xreg = function(..., prior_scale = NULL, standardize = "auto", type = NULL){
+  #   model_formula <- new_formula(
+  #     lhs = NULL,
+  #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
+  #   )
+  #   list(
+  #     xreg = model.matrix(model_formula, self$data),
+  #     prior_scale = prior_scale,
+  #     standardize = standardize,
+  #     mode = type
+  #   )
+  # },
   .required_specials = c("trend", "season")
 )
 
@@ -113,7 +113,7 @@ specials_bsts <- new_specials(
 #' and the right specifies the model's predictive terms. Like any model in the
 #' fable framework, it is possible to specify transformations on the response.
 #'
-#' A bsts model supports local linear and semi-local linear trends, local levels
+#' A bsts model supports local and semi-local linear trends, local levels
 #' with a random walk trend, additive seasonality and exogenous regressors.
 #' These can be specified using the 'specials' functions detailed
 #' below. The introduction vignette provides more details on how to model data
@@ -127,7 +127,7 @@ specials_bsts <- new_specials(
 #' \subsection{trend}{
 #' The `trend` special is used to specify the trend parameters.
 #' \preformatted{
-#' trend(type = c("locallinear", "semilocallinear", "locallevel"))
+#' trend(type = c("linear", "semilocal", "level"))
 #' }
 #'
 #' \tabular{ll}{
