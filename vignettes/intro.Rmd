@@ -1,5 +1,5 @@
 ---
-title: "Introduction to the fable interface for prophet"
+title: "Introduction to the fable interface for bsts"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{intro}
@@ -17,10 +17,10 @@ knitr::opts_chunk$set(
  
 ```{r setup, results = 'hide'}
 library(tsibble)
-library(fable.prophet)
+library(fable.bsts)
 ```
 
-The `fable.prophet` package provides an interface allowing the [prophet forecasting procedure](https://facebook.github.io/prophet/) to be used within the [fable framework](http://fable.tidyverts.org/). This allows you to use prophet to forecast multiple time series within the same workflow as other forecasting models. The interface provides a compact and flexible model specification, allowing you to create prophet models using a model formula.
+The `fable.bsts` package provides an interface allowing the [bsts forecasting procedure](https://facebook.github.io/prophet/) to be used within the [fable framework](http://fable.tidyverts.org/). This allows you to use prophet to forecast multiple time series within the same workflow as other forecasting models. The interface provides a compact and flexible model specification, allowing you to create prophet models using a model formula.
 
 ## Tidy temporal data
 
