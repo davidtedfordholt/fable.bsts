@@ -185,14 +185,14 @@ specials_bsts <- new_specials(
 #' library(dplyr)
 #' tsibbledata::aus_production %>%
 #'   model(
-#'     prophet = prophet(Beer ~ season("year", 4, type = "multiplicative"))
+#'     bsts = bsts(Beer ~ season("year", 4, type = "multiplicative"))
 #'   )
 #' }
 #'
 #' @export
-prophet <- function(formula, ...){
-  prophet_model <- new_model_class("prophet", train_prophet, specials_prophet)
-  new_model_definition(prophet_model, !!enquo(formula), ...)
+BSTS <- function(formula, ...){
+  bsts_model <- new_model_class("bsts", train_bsts, specials_bsts)
+  new_model_definition(bsts_model, !!enquo(formula), ...)
 }
 
 #' Produce forecasts from the prophet model
@@ -202,9 +202,9 @@ prophet <- function(formula, ...){
 #' of the `new_data` argument.
 #'
 #' @inheritParams fable::forecast.ARIMA
-#' @param ... Additional arguments passed to [`prophet::predict.prophet()`].
+#' @param ... Additional arguments passed to [`bsts::predict.bsts()`].
 #'
-#' @seealso [`prophet::predict.prophet()`]
+#' @seealso [`bsts::predict.bsts()`]
 #'
 #' @return A list of forecasts.
 #'
