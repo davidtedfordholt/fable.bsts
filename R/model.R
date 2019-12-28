@@ -17,7 +17,6 @@ train_bsts <- function(.data, specials, ...){
 
   # Initialize state specification
   state <- list()
-  prior <- SdPrior(sigma.guess = sd(vec_data))
 
   # Trend
   trend <- specials$trend[[1]]
@@ -52,6 +51,7 @@ train_bsts <- function(.data, specials, ...){
     state.specification = state,
     family = family,
     data = xts_data,
+    prior = SdPrior(sigma.guess = sd(vec_data)),
     niter = iterations
   )
   fits <- predict(mdl, model_data)
@@ -74,9 +74,12 @@ specials_bsts <- new_specials(
     # Compute number of seasons
     periods <- common_periods(self$data)
     nseasons <- get_frequencies(period, self$data, .auto = "smallest")
-    name <- names(periods)[which(periods == nseasons)]
-
-    if (!nseasons %in% periods) abort("period for seasonality is not correctly specified")
+    if (nseasons %in% periods) {
+      name <- names(periods)[which(periods == nseasons)]
+    } else {
+      name <- paste0("season_", nseasons)
+    }
+    rm(periods)
     as.list(environment())
   }
   # holiday = function(holiday.list = NULL) {
@@ -98,6 +101,7 @@ specials_bsts <- new_specials(
   #     mode = type
   #   )
   # },
+  # prior = function()
   # .required_specials = c("trend", "season")
 )
 
@@ -267,14 +271,14 @@ fitted.fbl_prophet <- function(object, ...){
 
 #' Extract model residuals
 #'
-#' Extracts the residuals from an estimated Prophet model.
+#' Extracts the residuals from an estimated bsts model.
 #'
 #' @inheritParams fable::residuals.ARIMA
 #'
 #' @return A vector of residuals.
 #'
 #' @export
-residuals.fbl_prophet <- function(object, ...){
+residuals.fbl_bsts <- function(object, ...){
   object$est[[".resid"]]
 }
 
