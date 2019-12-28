@@ -77,7 +77,7 @@ specials_bsts <- new_specials(
 
     if (!nseasons %in% periods) abort("period for seasonality is not correctly specified")
     as.list(environment())
-  },
+  }
   # holiday = function(holiday.list = NULL) {
   #
   #   # holidays have to be specified with the holiday function, and they need the same
@@ -97,7 +97,7 @@ specials_bsts <- new_specials(
   #     mode = type
   #   )
   # },
-  .required_specials = c("trend", "season")
+  # .required_specials = c("trend", "season")
 )
 
 #' bsts procedure modelling
