@@ -29,29 +29,26 @@ train_bsts <- function(.data, specials, ...){
     state <- bsts::AddLocalLevel(state.specification = state, y = vec_data)
   }
 
-  # Holidays
-  holiday <- specials$holiday[[1]]
+  # # Holidays
+  # holiday <- specials$holiday[[1]]
 
   # Seasonality
   for (season in specials$season){
-    mdl <- prophet::add_seasonality(
-      mdl, name = season$name, period = season$period,
-      fourier.order = season$order, prior.scale = season$prior_scale,
-      mode = season$type)
+    state <- bsts::AddSeasonal(state, name = season$name, nseasons = season$nseasons)
   }
 
-  # Exogenous Regressors
-  for(regressor in specials$xreg){
-    for(nm in colnames(regressor$xreg)){
-      model_data[nm] <- regressor$xreg[,nm]
-      mdl <- prophet::add_regressor(
-        mdl, name = nm, prior.scale = regressor$prior_scale,
-        standardize = regressor$standardize, mode = regressor$mode)
-    }
-  }
+  # # Exogenous Regressors
+  # for(regressor in specials$xreg){
+  #   for(nm in colnames(regressor$xreg)){
+  #     model_data[nm] <- regressor$xreg[,nm]
+  #     state <- bsts::AddDynamicRegression(
+  #       state, name = nm, prior.scale = regressor$prior_scale,
+  #       standardize = regressor$standardize, mode = regressor$mode)
+  #   }
+  # }
 
   # Train model
-  mdl <- bsts::bsts(
+  model <- bsts::bsts(
     state.specification = state,
     family = family,
     data = xts_data,
@@ -77,6 +74,7 @@ specials_bsts <- new_specials(
     # Compute number of seasons
     periods <- common_periods(self$data)
     nseasons <- get_frequencies(period, self$data, .auto = "smallest")
+    name <- names(periods)[which(periods == nseasons)]
 
     if (!nseasons %in% periods) abort("period for seasonality is not correctly specified")
     as.list(environment())
@@ -88,7 +86,7 @@ specials_bsts <- new_specials(
   #   # list given in the manner that prophet allows.
   #
   # },
-  # xreg = function(..., prior_scale = NULL, standardize = "auto", type = NULL){
+  # xreg = function(..., lags = 1, standardize = "auto", type = NULL){
   #   model_formula <- new_formula(
   #     lhs = NULL,
   #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
