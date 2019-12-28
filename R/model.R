@@ -70,54 +70,19 @@ train_bsts <- function(.data, specials, ...){
 }
 
 specials_bsts <- new_specials(
-  trend = function(type = c("local", "semilocal")){
+  trend = function(type = c("locallinear", "semilocallinear", "locallevel")){
     type <- match.arg(type)
     as.list(environment())
   },
-  season = function(period = NULL, order = NULL, prior_scale = 10,
-                    type = c("additive", "multiplicative"),
-                    name = NULL){
-    # Extract data interval
-    interval <- tsibble::interval(self$data)
-    interval <- with(interval, lubridate::years(year) +
-                       lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
-                       lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
-                       lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
-                       lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
+  season = function(period = NULL){
+    # Compute number of seasons
+    periods <- common_periods(self$data)
+    nseasons <- get_frequencies(period, self$data, .auto = "smallest")
 
-    if(is.null(name) & is.character(period)){
-      name <- period
-    }
-
-    # Compute prophet interval
-    period <- get_frequencies(period, self$data, .auto = "smallest")
-    period <- period * suppressMessages(interval/lubridate::days(1))
-
-    if(is.null(name)){
-      name <- paste0("season", period)
-    }
-
-    if(is.null(order)){
-      if(period %in% c(365.25, 7, 1)){
-        order <- c(10, 3, 4)[period == c(365.25, 7, 1)]
-      }
-      else{
-        abort(
-          sprintf("Unable to add %s to the model. The fourier order has no default, and must be specified with `order = ?`.",
-                  deparse(match.call()))
-        )
-      }
-    }
-    order <- as.integer(order)
-    type <- match.arg(type)
+    if (!nseasons %in% periods) abort("period for seasonality is not correctly specified")
     as.list(environment())
   },
-  holiday = function(holidays = NULL, prior_scale = 10L){
-    if(tsibble::is_tsibble(holidays)){
-      holidays <- rename(as_tibble(holidays), ds = !!index(holidays))
-    }
-    as.list(environment())
-  },
+
   xreg = function(..., prior_scale = NULL, standardize = "auto", type = NULL){
     model_formula <- new_formula(
       lhs = NULL,
