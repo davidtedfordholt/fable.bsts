@@ -137,9 +137,10 @@ specials_bsts <- new_specials(
 #' }
 #'
 #' \subsection{season}{
-#' The `season` special is used to specify a seasonal component. This special can be used multiple times for different seasonalities.
+#' The `season` special is used to specify a seasonal component.
+#' This special can be used multiple times for different seasonalities.
 #'
-#' **Warning: The inputs controlling the seasonal `period` is specified is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
+#' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
 #'
 #' \preformatted{
 #' season(period = NULL)
@@ -228,20 +229,14 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
 
   ## trend
-  growth <- specials$growth[[1]]
-  if(!is.null(growth$capacity)){
-    new_data$cap <- growth$capacity
-  }
-  if(!is.null(growth$floor)){
-    new_data$floor <- growth$floor
-  }
+  trend <- specials$trend[[1]]
 
-  ## Exogenous Regressors
-  for(regressor in specials$xreg){
-    for(nm in colnames(regressor$xreg)){
-      new_data[nm] <- regressor$xreg[,nm]
-    }
-  }
+  # ## Exogenous Regressors
+  # for(regressor in specials$xreg){
+  #   for(nm in colnames(regressor$xreg)){
+  #     new_data[nm] <- regressor$xreg[,nm]
+  #   }
+  # }
 
   # Compute predictions without intervals
   mdl$uncertainty.samples <- 0
