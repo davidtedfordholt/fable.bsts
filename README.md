@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# fable.bsts
+# fable.bsts (under construction)
 
 [![Travis build
 status](https://travis-ci.org/mitchelloharawild/fable.prophet.svg?branch=master)](https://travis-ci.org/mitchelloharawild/fable.prophet)
