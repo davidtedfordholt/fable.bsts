@@ -1,0 +1,111 @@
+---
+title: "Fitting Bayesian structural time series with the bsts R package"
+author: "David Holt"
+date: "12/31/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bsts)     # load the bsts package
+library(tidyverse)
+library(tsibble)
+library(fable)
+library(fable.bsts)
+```
+
+## Example 1: Nowcasting
+
+```{r nowcasting}
+data(iclaims)     # bring the initial.claims data into scope
+
+ss <- AddLocalLinearTrend(list(), initial.claims$iclaimsNSA)
+ss <- AddSeasonal(ss, initial.claims$iclaimsNSA, nseasons = 52)
+model1 <- bsts(initial.claims$iclaimsNSA,
+               state.specification = ss,
+               niter = 1000)
+
+pred1 <- predict(model1, horizon = 12)
+
+# Fit a bsts model with expected model size 1, the default.
+model2 <- bsts(iclaimsNSA ~ .,
+               state.specification = ss,
+               niter = 1000,
+               data = initial.claims)
+
+# Fit a bsts model with expected model size 5, to include more coefficients.
+model3 <- bsts(iclaimsNSA ~ .,
+               state.specification = ss,
+               niter = 1000,
+               data = initial.claims,
+               expected.model.size = 5)  # Passed to SpikeSlabPrior.
+
+
+data <- tsbox::ts_tsibble(initial.claims) %>% spread(key = id, value = value)
+
+mbl <- data %>%
+  model(
+    bsts_1 = BSTS(iclaimsNSA ~ trend("local") + season(52), niter = 1000),
+    bsts_2 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(.)),
+    bsts_3 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(., expected_size = 5))
+  )
+
+fbl <- forecast(mbl, h = 12)
+
+```
+
+## Example 2: Long term forecasting
+
+```{r longterm}
+ss1 <- AddLocalLinearTrend(list(), sp500)
+model1 <- bsts(sp500, state.specification = ss1, niter = 1000)
+pred1 <- predict(model1, horizon = 360)
+
+
+ss2 <- AddSemilocalLinearTrend(list(), sp500)
+model2 <- bsts(sp500, state.specification = ss2, niter = 1000)
+pred2 <- predict(model2, horizon = 360)
+
+
+plot(pred2, plot.original = 360, ylim = range(pred1))
+plot(pred1, plot.original = 360, ylim = range(pred1))
+
+
+```
+
+
+## Example 3: Recession modeling using non-Gaussian data
+
+```{r nonGaussian}
+ss <- AddLocalLevel(list(),
+                    sigma.prior = SdPrior(sigma.guess = .1,
+                                          sample.size = 1,
+                                          upper.limit = 1),
+                    initial.state.prior = NormalPrior(0, 5))
+
+
+## Tell bsts that the observation equation should be a logistic regression by
+## passing the 'family = "logit"' argument.
+ts.model <- bsts(nber ~ ., ss, data = gdp, niter = 20000,a
+                 family = "logit", expected.model.size = 10)
+```
+
+## Conclusion
+
+```{r conclusion}
+ss <- AddSeasonal(ss, y, nseasons = 24)
+ss <- AddSeasonal(ss, y, nseasons = 7, season.duration = 24)
+```
+
+
+```{r}
+tsbl_elec <- tsibbledata::elecdemand %>% filter(index < ymd("2014-03-01"))
+fbl_elec_fit <- tsbl_elec %>%
+  fable::ARIMA(Demand ~ WorkDay + Temperature + I(Temperature^2) +
+               pdq(1,0,1) + PDQ(1,1,1, period = "day"))
+
+
+tsibbledata::global_economy %>%
+  filter(Country == "Australia") %>%
+  model(ARIMA(log(GDP) ~ Population))
+```
