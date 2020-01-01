@@ -15,14 +15,24 @@ library(fable)
 library(fable.bsts)
 ```
 
+This is a mock-up of how fable-style formulas could be used to express state specifications for bsts models.
+
+I'm using the following functions as formula "specials":
+  `trend(type = c("level", "local", "semilocal", "AR"), ...)`
+  `season(nseasons, duration = NULL, ...)`
+  `xreg(data, ...)`
+  `trig(period, frequencies, ...)`
+  `holiday(holidays, ...)`
+  
+This allows the specification of the state through a formula such as
+  `response ~ trend("level") + season(24) + xreg(.) + holiday(holidays)`
+
+
 ## Example 1: Nowcasting
 
 ```{r nowcasting}
 # DATA
 data(iclaims)     # bring the initial.claims data into scope
-
-data <- ts_tsibble(initial.claims) %>% 
-  spread(key = id, value = value)
 
 # MODEL 1
 ss <- AddLocalLinearTrend(list(), initial.claims$iclaimsNSA)
@@ -47,74 +57,81 @@ model3 <- bsts(iclaimsNSA ~ .,
                data = initial.claims,
                expected.model.size = 5)  # Passed to SpikeSlabPrior.
 
+# DATA - fable
+# code that would transform iclaims into a wide tsibble
+iclaims <- ts_tsibble(initial.claims) %>% 
+  spread(key = id, value = value)
 
 # MODELS 1, 2, 3 - fable
-mbl <- data %>%
-  model(
-    bsts_1 = BSTS(iclaimsNSA ~ trend("local") + season(52), niter = 1000),
-    bsts_2 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(.)),
-    bsts_3 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(., expected_size = 5))
-  )
+mbl <- model(iclaims,
+             bsts_1 = BSTS(iclaimsNSA ~ trend("local") + season(52), niter = 1000),
+             bsts_2 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(.)),
+             bsts_3 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(., expected_size = 5)))
 
-# FORECAST MODEL 1 - fble
+# FORECAST MODEL 1 - fable
 fbl <- mbl %>%
-  select(-bsts_2, -bsts3) %>%
+  select(-bsts_2, -bsts_3) %>%     # only because models 2 and 3 aren't modeled in the article
   forecast(mbl, h = 12)
-
 ```
 
 ## Example 2: Long term forecasting
 
+We assume data is set up properly for each. The mbl (model table) could be passed automatically to the `forecast()` function in the fable version, if the only object needed at the end was the table of forecasts.
+
 ```{r longterm}
+# MODEL 1 
 ss1 <- AddLocalLinearTrend(list(), sp500)
 model1 <- bsts(sp500, state.specification = ss1, niter = 1000)
 pred1 <- predict(model1, horizon = 360)
 
-
+# MODEL 2
 ss2 <- AddSemilocalLinearTrend(list(), sp500)
 model2 <- bsts(sp500, state.specification = ss2, niter = 1000)
 pred2 <- predict(model2, horizon = 360)
 
-
-plot(pred2, plot.original = 360, ylim = range(pred1))
-plot(pred1, plot.original = 360, ylim = range(pred1))
-
-
+# MODELS 1, 2 - fable
+mbl <- model(sp500,
+             bsts_1 = BSTS(iclaimsNSA ~ trend("local"), niter = 1000),
+             bsts_2 = BSTS(iclaimsNSA ~ trend("semilocal"), niter = 1000))
+fbl <- forecast(mbl, h = 360)
 ```
-
 
 ## Example 3: Recession modeling using non-Gaussian data
 
 ```{r nonGaussian}
+# MODEL
 ss <- AddLocalLevel(list(),
                     sigma.prior = SdPrior(sigma.guess = .1,
                                           sample.size = 1,
                                           upper.limit = 1),
                     initial.state.prior = NormalPrior(0, 5))
-
-
-## Tell bsts that the observation equation should be a logistic regression by
-## passing the 'family = "logit"' argument.
 ts.model <- bsts(nber ~ ., ss, data = gdp, niter = 20000,
                  family = "logit", expected.model.size = 10)
+
+# MODEL - fable
+mbl <- model(gdp,
+  bsts = BSTS(
+    nber ~ trend("level",
+                 sigma_prior = SdPrior(sigma_guess = .1, sample_size = 1, upper_limmit = 1),
+                 initial_state_prior = NormalPrior(0, 5)) + 
+      xreg(., expected_size = 10), 
+    niter = 20000, family = "logit"))
 ```
 
 ## Conclusion
 
 ```{r conclusion}
+# bsts
 ss <- AddSeasonal(ss, y, nseasons = 24)
+# fable 1
+mbl <- model(data, bsts = BSTS(value ~ season(24)))
+# fable 2
+mbl <- model(data, bsts = BSTS(value ~ season("1 day")))
+
+# bsts
 ss <- AddSeasonal(ss, y, nseasons = 7, season.duration = 24)
-```
-
-
-```{r}
-tsbl_elec <- tsibbledata::elecdemand %>% filter(index < ymd("2014-03-01"))
-fbl_elec_fit <- tsbl_elec %>%
-  fable::ARIMA(Demand ~ WorkDay + Temperature + I(Temperature^2) +
-               pdq(1,0,1) + PDQ(1,1,1, period = "day"))
-
-
-tsibbledata::global_economy %>%
-  filter(Country == "Australia") %>%
-  model(ARIMA(log(GDP) ~ Population))
+# fable 1
+mbl <- model(data, bsts = BSTS(value ~ season(7, duration = 24)))
+# fable 2
+mbl <- model(data, bsts = BSTS(value ~ season("1 week", duration = "1 day")))
 ```
