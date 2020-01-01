@@ -20,11 +20,11 @@ library(tsibble)
 library(fable.bsts)
 ```
 
-The `fable.bsts` package provides an interface allowing the [bsts forecasting procedure](https://facebook.github.io/prophet/) to be used within the [fable framework](http://fable.tidyverts.org/). This allows you to use prophet to forecast multiple time series within the same workflow as other forecasting models. The interface provides a compact and flexible model specification, allowing you to create prophet models using a model formula.
+The `fable.bsts` package provides an interface allowing the [bsts forecasting procedure](http://www.unofficialgoogledatascience.com/2017/07/fitting-bayesian-structural-time-series.html) to be used within the [fable framework](http://fable.tidyverts.org/). This allows you to use bsts to forecast multiple time series within the same workflow as other forecasting models. The interface provides a compact and flexible model specification, allowing you to create bsts models using a model formula.
 
 ## Tidy temporal data
 
-The tidy temporal data structure [tsibble](http://tsibbledata.tidyverts.org/) is used to represent time series data. A `tsibble` is extends the `data.frame` used in the [prophet](https://cran.r-project.org/package=prophet) package with the concepts of `index` and `key` variables. The `index` refers to the column of data containing the observations measurement time (the `ds` column in prophet). The `key` variables are used to uniquely identify each time series in the dataset, allowing separate prophet models to be applied on each time series.
+The tidy temporal data structure [tsibble](http://tsibbledata.tidyverts.org/) is used to represent time series data. A `tsibble` extends the `data.frame` used in the [bsts](https://cran.r-project.org/package=bsts) package with the concepts of `index` and `key` variables. The `index` refers to the column of data containing the observations measurement time (the `ds` column in prophet). The `key` variables are used to uniquely identify each time series in the dataset, allowing separate prophet models to be applied on each time series.
 
 For this analysis let's compare the number of domestic and international passengers passing through Los Angeles International Airport. The data is published by data.lacity.org and available on [data.gov](https://catalog.data.gov/dataset/los-angeles-international-airport-passenger-traffic-by-terminal-756ee). The data is re-hosted in this package's GitHub repository for reproducibility.
 
