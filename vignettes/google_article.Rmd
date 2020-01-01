@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(bsts)     # load the bsts package
 library(tidyverse)
 library(tsibble)
+library(tsbox)
 library(fable)
 library(fable.bsts)
 ```
@@ -17,23 +18,29 @@ library(fable.bsts)
 ## Example 1: Nowcasting
 
 ```{r nowcasting}
+# DATA
 data(iclaims)     # bring the initial.claims data into scope
 
+data <- ts_tsibble(initial.claims) %>% 
+  spread(key = id, value = value)
+
+# MODEL 1
 ss <- AddLocalLinearTrend(list(), initial.claims$iclaimsNSA)
 ss <- AddSeasonal(ss, initial.claims$iclaimsNSA, nseasons = 52)
 model1 <- bsts(initial.claims$iclaimsNSA,
                state.specification = ss,
                niter = 1000)
 
+# FORECAST MODEL 1
 pred1 <- predict(model1, horizon = 12)
 
-# Fit a bsts model with expected model size 1, the default.
+# MODEL 2
 model2 <- bsts(iclaimsNSA ~ .,
                state.specification = ss,
                niter = 1000,
                data = initial.claims)
 
-# Fit a bsts model with expected model size 5, to include more coefficients.
+# MODEL 3
 model3 <- bsts(iclaimsNSA ~ .,
                state.specification = ss,
                niter = 1000,
@@ -41,8 +48,7 @@ model3 <- bsts(iclaimsNSA ~ .,
                expected.model.size = 5)  # Passed to SpikeSlabPrior.
 
 
-data <- tsbox::ts_tsibble(initial.claims) %>% spread(key = id, value = value)
-
+# MODELS 1, 2, 3 - fable
 mbl <- data %>%
   model(
     bsts_1 = BSTS(iclaimsNSA ~ trend("local") + season(52), niter = 1000),
@@ -50,7 +56,10 @@ mbl <- data %>%
     bsts_3 = BSTS(iclaimsNSA ~ trend("local") + season(52) + xreg(., expected_size = 5))
   )
 
-fbl <- forecast(mbl, h = 12)
+# FORECAST MODEL 1 - fble
+fbl <- mbl %>%
+  select(-bsts_2, -bsts3) %>%
+  forecast(mbl, h = 12)
 
 ```
 
@@ -86,7 +95,7 @@ ss <- AddLocalLevel(list(),
 
 ## Tell bsts that the observation equation should be a logistic regression by
 ## passing the 'family = "logit"' argument.
-ts.model <- bsts(nber ~ ., ss, data = gdp, niter = 20000,a
+ts.model <- bsts(nber ~ ., ss, data = gdp, niter = 20000,
                  family = "logit", expected.model.size = 10)
 ```
 
