@@ -45,7 +45,18 @@ train_bsts <- function(.data, specials, ...) {
   # holiday <- specials$holiday[[1]]
 
   # Seasonality
-  for (season in specials$season){
+  for (season in specials$season) {
+    season_type <- trimws(tolower(season$type))
+
+    if (is_missing(type) || type %in% c("season", "seasonal")) {
+      state <- AddSeasonal(state)
+    } else if (type %in% c("trig", "trigonometric", "harmonic")) {
+      state <- AddTrig(state)
+    } else if (type %in% c("cycle", "monthlyannual", "monthlyannualcycle")) {
+      state <- AddMonthlyAnnualCycle(state)
+    }
+
+
     state <- bsts::AddSeasonal(state, name = season$name, nseasons = season$nseasons)
   }
 
