@@ -20,13 +20,25 @@ train_bsts <- function(.data, specials, ...){
 
   # Trend
   trend <- specials$trend[[1]]
-  model_data$trend_type <- trend$type
-  if (trend$type == "linear") {
-    state <- bsts::AddLocalLinearTrend(state.specification = state, y = vec_data)
-  } else if (trend$type == "semilocal") {
-    state <- bsts::AddSemilocalLinearTrend(state.specification = state, y = vec_data)
-  } else if (trend$type == "level") {
-    state <- bsts::AddLocalLevel(state.specification = state, y = vec_data)
+  trend$type <- trimws(tolower(trend$type))
+
+  if (is_missing(trend$type) || trend$type %in% c("static", "intercept", "staticintercept")) {
+    state <- AddStaticIntercept(state)
+  } else if (trend$type == "autoar" ||
+             (trend$type == "ar" && is_missing(trend$lags))) {
+    state <- AddAutoAr(state)
+  } else if (trend$type == "ar") {
+    state <- AddAr(state)
+  } else if (trend$type %in% c("level", "locallevel")) {
+    state <- AddLocalLevel(state)
+  } else if (trend$type %in% c("shared", "sharedlevel")) {
+    state <- AddSharedLocalLevel(state)
+  } else if (trend$type %in% c("locallinear", "linear")) {
+    state <- AddLocalLinearTrend(state)
+  } else if (trend$type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
+    state <- AddSemilocalLinearTrend(state)
+  } else if (trend$type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
+    state <- AddStudentLocalLinearTrend(state)
   }
 
   # # Holidays
