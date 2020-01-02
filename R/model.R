@@ -5,8 +5,8 @@
 globalVariables("self")
 
 #' @importFrom stats predict
-train_bsts <- function(.data, specials, ...){
-  if(length(tsibble::measured_vars(.data)) > 1){
+train_bsts <- function(.data, specials, ...) {
+  if(length(tsibble::measured_vars(.data)) > 1) {
     abort("Only univariate responses are supported by bsts")
   }
 
@@ -20,24 +20,24 @@ train_bsts <- function(.data, specials, ...){
 
   # Trend
   trend <- specials$trend[[1]]
-  trend$type <- trimws(tolower(trend$type))
+  trend_type <- trimws(tolower(trend$type))
 
-  if (is_missing(trend$type) || trend$type %in% c("static", "intercept", "staticintercept")) {
+  if (is_missing(trend_type) || trend_type %in% c("static", "intercept", "staticintercept")) {
     state <- AddStaticIntercept(state)
-  } else if (trend$type == "autoar" ||
-             (trend$type == "ar" && is_missing(trend$lags))) {
+  } else if (trend_type == "autoar" ||
+             (trend_type == "ar" && is_missing(trend$lags))) {
     state <- AddAutoAr(state)
-  } else if (trend$type == "ar") {
+  } else if (trend_type == "ar") {
     state <- AddAr(state)
-  } else if (trend$type %in% c("level", "locallevel")) {
+  } else if (trend_type %in% c("level", "locallevel")) {
     state <- AddLocalLevel(state)
-  } else if (trend$type %in% c("shared", "sharedlevel")) {
+  } else if (trend_type %in% c("shared", "sharedlevel")) {
     state <- AddSharedLocalLevel(state)
-  } else if (trend$type %in% c("locallinear", "linear")) {
+  } else if (trend_type %in% c("locallinear", "linear")) {
     state <- AddLocalLinearTrend(state)
-  } else if (trend$type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
+  } else if (trend_type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
     state <- AddSemilocalLinearTrend(state)
-  } else if (trend$type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
+  } else if (trend_type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
     state <- AddStudentLocalLinearTrend(state)
   }
 
