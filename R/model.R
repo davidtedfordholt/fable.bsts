@@ -20,39 +20,77 @@ train_bsts <- function(.data, specials, ...) {
 
   # Trend
   trend <- specials$trend[[1]]
-  trend_type <- trimws(tolower(trend$type))
+  trend$type <- trimws(tolower(trend$type))
 
-  if (is_missing(trend_type) || trend_type %in% c("static", "intercept", "staticintercept")) {
-    state <- AddStaticIntercept(state)
-  } else if (trend_type == "autoar" ||
-             (trend_type == "ar" && is_missing(trend$lags))) {
-    state <- AddAutoAr(state)
-  } else if (trend_type == "ar") {
+  if (is_missing(trend$type) || trend$type %in% c("static", "intercept", "staticintercept")) {
+    state <- AddStaticIntercept(
+      state.specification = state,
+      y = vec_data,
+      initial.state.prior = trend$initial_state_prior #from NormalPrior()
+      )
+  } else if (trend$type == "autoar" ||
+             (trend$type == "ar" && is_missing(trend$lags))) {
+    state <- AddAutoAr(
+      state.specification = state,
+      y = vec_data,
+      lags = trend$lags
+      )
+  } else if (trend$type == "ar") {
     state <- AddAr(state)
-  } else if (trend_type %in% c("level", "locallevel")) {
+  } else if (trend$type %in% c("level", "locallevel")) {
     state <- AddLocalLevel(state)
-  } else if (trend_type %in% c("shared", "sharedlevel")) {
+  } else if (trend$type %in% c("shared", "sharedlevel")) {
     state <- AddSharedLocalLevel(state)
-  } else if (trend_type %in% c("locallinear", "linear")) {
+  } else if (trend$type %in% c("locallinear", "linear")) {
     state <- AddLocalLinearTrend(state)
-  } else if (trend_type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
+  } else if (trend$type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
     state <- AddSemilocalLinearTrend(state)
-  } else if (trend_type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
+  } else if (trend$type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
     state <- AddStudentLocalLinearTrend(state)
   }
 
   # # Holidays
   # holiday <- specials$holiday[[1]]
+  for (holiday in specials$holiday) {
+    holiday_type <- trimws(tolower(holiday$type))
+
+    if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
+      state <- AddRegressionHoliday(
+        state.specification = state,
+        y = vec_data,
+        holiday.list = holiday$holidays_list,
+        time0 = holiday$first_observation,
+        prior = holiday$prior)
+    } else if (holiday_type %in% c("randomwalk", "rw")) {
+      state <- AddRandomWalkHoliday(
+        state.specification = state,
+        y = vec_data,
+        holiday = holiday$holidays_list,
+        time0 = holiday$first_observation,
+        sigma.prior = holiday$sigma_prior,
+        initial.state.prior = holiday$initial_state_prior
+        )
+    } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
+      state <- AddHierarchicalRegressionHoliday(
+        state.specification = state,
+        y = vec_data,
+        holiday.list = holiday$holidays_list,
+        coefficient.mean.prior = holiday$coefficient_mean_prior,
+        coefficient.variance.prior = holiday$coefficient_variance_prior,
+        time0 = holiday$first_observation
+        )
+    }
+  }
 
   # Seasonality
   for (season in specials$season) {
     season_type <- trimws(tolower(season$type))
 
-    if (is_missing(type) || type %in% c("season", "seasonal")) {
+    if (is_missing(season_type) || season_type %in% c("season", "seasonal")) {
       state <- AddSeasonal(state)
-    } else if (type %in% c("trig", "trigonometric", "harmonic")) {
+    } else if (season_type %in% c("trig", "trigonometric", "harmonic")) {
       state <- AddTrig(state)
-    } else if (type %in% c("cycle", "monthlyannual", "monthlyannualcycle")) {
+    } else if (season_type %in% c("cycle", "monthlyannual", "monthlyannualcycle")) {
       state <- AddMonthlyAnnualCycle(state)
     }
 
