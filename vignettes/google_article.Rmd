@@ -15,7 +15,7 @@ library(fable)
 library(fable.bsts)
 ```
 
-This is a mock-up of how fable-style formulas could be used to express state specifications for bsts models.
+This is a mock-up of how fable-style formulas could be used to express state specifications for bsts models. It includes code from Steven Scott's article "Fitting Bayesian structural time series with the bsts R package."
 
 I'm using the following functions as formula "specials":
   `trend(type = c("level", "local", "semilocal", "AR"), ...)`
