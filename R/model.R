@@ -6,13 +6,12 @@ globalVariables("self")
 
 #' @importFrom stats predict
 train_bsts <- function(.data, specials, ...) {
-  if(length(tsibble::measured_vars(.data)) > 1) {
+  if (length(tsibble::measured_vars(.data)) > 1) {
     abort("Only univariate responses are supported by bsts")
   }
 
   # Prepare data for modelling
   model_data <- as_tibble(.data)[c(expr_text(index(.data)), measured_vars(.data))]
-  xts_data <- xts::xts(x = .data[measured_vars(.data)], order.by = .data[expr_text(index(.data))])
   vec_data <- model_data %>% pull(measured_vars(.data))
 
   # Initialize state specification
@@ -26,27 +25,74 @@ train_bsts <- function(.data, specials, ...) {
     state <- AddStaticIntercept(
       state.specification = state,
       y = vec_data,
-      initial.state.prior = trend$initial_state_prior #from NormalPrior()
+      initial.state.prior = trend$initial_state_prior       # from NormalPrior()
       )
   } else if (trend$type == "autoar" ||
              (trend$type == "ar" && is_missing(trend$lags))) {
     state <- AddAutoAr(
       state.specification = state,
       y = vec_data,
-      lags = trend$lags
+      lags = trend$max_lag,
+      prior = trend$prior                                   # from SpikeSlabARPrior()
       )
   } else if (trend$type == "ar") {
-    state <- AddAr(state)
+    state <- AddAr(
+      state.specification = state,
+      y = vec_data,
+      lags = trend$lags,
+      sigma.prior = trend$sigma_prior,
+      initial.state.prior = trend$initial_state_prior
+      )
   } else if (trend$type %in% c("level", "locallevel")) {
-    state <- AddLocalLevel(state)
-  } else if (trend$type %in% c("shared", "sharedlevel")) {
-    state <- AddSharedLocalLevel(state)
+    state <- AddLocalLevel(
+      state.specification = state,
+      y = vec_data,
+      sigma.prior = trend$sigma_prior,
+      initial.state.prior = trend$initial_state_prior
+      )
+  # } else if (trend$type %in% c("shared", "sharedlevel")) {
+  #
+  #
+  #   state <- AddSharedLocalLevel(
+  #     state.specification = state,
+  #     y = vec_data,
+  #     response = response_data,
+  #     nfactors = trend$nfactors,
+  #     coefficient.prior = trend$coefficient_prior,          # from ScaledMatrixNormalPrior
+  #     initial.state.prior = trend$initial_state_prior       # from MvnPrior
+  #     )
   } else if (trend$type %in% c("locallinear", "linear")) {
-    state <- AddLocalLinearTrend(state)
+    state <- AddLocalLinearTrend(
+      state.specification = state,
+      y = vec_data,
+      level.sigma.prior = trend$level_sigma_prior,
+      slope.sigma.prior = trend$slope_sigma_prior,
+      initial.level.prior = trend$initial_level_prior,
+      initial.slope.prior = trend$initial_slope_prior
+      )
   } else if (trend$type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
-    state <- AddSemilocalLinearTrend(state)
+    state <- AddSemilocalLinearTrend(
+      state.specification = state,
+      y = vec_data,
+      level.sigma.prior = trend$level_sigma_prior,            # from SdPrior
+      slope.mean.prior = trend$slope_mean_prior,              # from NormalPrior
+      slope.ar1.prior = trend$slope_ar1_prior,                # from Ar1CoefficientPrior
+      slope.sigma.prior = trend$slope_sigma_prior,            # from SdPrior
+      initial.level.prior = trend$initial_level_prior,        # from NormalPrior
+      initial.slope.prior = trend$initial_slope_prior,        # from NormalPrior
+      )
   } else if (trend$type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
-    state <- AddStudentLocalLinearTrend(state)
+    state <- AddStudentLocalLinearTrend(
+      state.specification = state,
+      y = vec_data,
+      save.weights = FALSE,
+      level.sigma.prior = trend$level_sigma_prior,
+      level.nu.prior = trend$level_nu_prior,
+      slope.sigma.prior = trend$slope_sigma_prior,
+      slope.nu.prior = trend$slope_nu_prior,
+      initial.level.prior = trend$initial_level_prior,
+      initial.slope.prior = trend$initial_slope_prior
+      )
   }
 
   # # Holidays
@@ -98,13 +144,34 @@ train_bsts <- function(.data, specials, ...) {
     state <- bsts::AddSeasonal(state, name = season$name, nseasons = season$nseasons)
   }
 
-  # # Exogenous Regressors
-  # for(regressor in specials$xreg){
-  #   for(nm in colnames(regressor$xreg)){
-  #     model_data[nm] <- regressor$xreg[,nm]
-  #     state <- bsts::AddDynamicRegression(
-  #       state, name = nm, )
-  #   }
+  # Exogenous Regressors
+
+  xreg_data <-
+    if (nrow(xreg_data) != length(vec_data)) {
+      abort("The number of observations in ")
+    }
+
+  for(regressor in specials$xreg){
+    for(nm in colnames(regressor$xreg)){
+      model_data[nm] <- regressor$xreg[,nm]
+
+      if (nrow(xreg_data) != length(vec_data)) {
+        abort("The number of observations in ")
+      }
+
+
+      state <- bsts::AddDynamicRegression(
+        state, name = nm, )
+    }
+  }
+
+  # # Model Prior
+  # if ("prior" %in% names(specials)) {
+  #   prior <- specials$prior
+  # } else if ("xreg" %in% names(specials)) {
+  #   prior <- SpikeSlabPrior()
+  # } else {
+  #   prior <- SdPrior()
   # }
 
   # Train model
@@ -112,7 +179,7 @@ train_bsts <- function(.data, specials, ...) {
     state.specification = state,
     family = family,
     data = xts_data,
-    prior = SdPrior(sigma.guess = sd(vec_data)),
+    prior = prior,
     niter = iterations
   )
   fits <- predict(mdl, model_data)
