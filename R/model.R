@@ -43,22 +43,33 @@ train_bsts <- function(.data, specials, ...) {
     )
   }
 
+  #-------------------------------------------------------------------------------------------------
+  # AR and AUTOAR
+  #-------------------------------------------------------------------------------------------------
+
+  if ("ar" %in% names(specials)) {
+
+    # check intercept validity
+    if (length(specials$ar) > 1) {
+      abort("BSTS only supports a single AR argument")
+    }
+
+    ar <- specials$ar[[1]]
+
+    if (!"lags" %in% names(trend)) {
+      state <- AddAutoAr(
+        state.specification = state,
+        y = vec_data
       )
-  } else if (trend$type == "autoar" ||
-             (trend$type == "ar" && is_missing(trend$lags))) {
-    state <- AddAutoAr(
-      state.specification = state,
-      y = vec_data,
-      lags = trend$max_lag,
-      prior = trend$prior                                   # from SpikeSlabARPrior()
+    } else if (trend$type == "ar") {
+      state <- AddAr(
+        state.specification = state,
+        y = vec_data,
+        lags = trend$lags
       )
-  } else if (trend$type == "ar") {
-    state <- AddAr(
-      state.specification = state,
-      y = vec_data,
-      lags = trend$lags,
-      sigma.prior = trend$sigma_prior,
-      initial.state.prior = trend$initial_state_prior
+    }
+  }
+
       )
   } else if (trend$type %in% c("level", "locallevel")) {
     state <- AddLocalLevel(
