@@ -303,6 +303,8 @@ specials_bsts <- new_specials(
   # }
 )
 
+# DOCUMENTATION ====================================================================================
+
 #' bsts procedure modelling
 #'
 #' Prepares a bsts model specification for use within the `fable` package.
