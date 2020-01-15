@@ -475,6 +475,9 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   )
 }
 
+# EXTRACT FITTED ===================================================================================
+
+
 #' Extract fitted values
 #'
 #' Extracts the fitted values from an estimated Prophet model.
@@ -488,6 +491,8 @@ fitted.fbl_prophet <- function(object, ...){
   object$est[[".fitted"]]
 }
 
+# EXTRACT RESIDUALS ================================================================================
+
 #' Extract model residuals
 #'
 #' Extracts the residuals from an estimated bsts model.
@@ -500,6 +505,8 @@ fitted.fbl_prophet <- function(object, ...){
 residuals.fbl_bsts <- function(object, ...){
   object$est[[".resid"]]
 }
+
+# EXTRACT COMPONENTS ===============================================================================
 
 #' Extract meaningful components
 #'
@@ -549,9 +556,11 @@ components.fbl_bsts <- function(object, ...){
   )
 }
 
-#' Glance a prophet model
+# GLANCE MODEL =====================================================================================
+
+#' Glance a bsts model
 #'
-#' A glance of a prophet provides the residual's standard deviation (sigma), and
+#' A glance of a bsts provides the residual's standard deviation (sigma), and
 #' a tibble containing the selected changepoints with their trend adjustments.
 #'
 #' @inheritParams fable::glance.ARIMA
@@ -565,14 +574,14 @@ components.fbl_bsts <- function(object, ...){
 #' library(dplyr)
 #' fit <- tsibbledata::aus_production %>%
 #'   model(
-#'     prophet = prophet(Beer ~ season("year", 4, type = "multiplicative"))
+#'     bsts = BSTS(Beer ~ season())
 #'   )
 #'
 #' glance(fit)
 #' }
 #'
 #' @export
-glance.fbl_prophet <- function(x, ...){
+glance.fbl_bsts <- function(x, ...){
   changepoints <- tibble(
     changepoints = x$model$changepoints,
     adjustment = as.numeric(x$model$params$delta)
@@ -580,7 +589,9 @@ glance.fbl_prophet <- function(x, ...){
   tibble(sigma = stats::sd(x$est$.resid, na.rm = TRUE), changepoints = list(changepoints))
 }
 
-#' Extract estimated coefficients from a prophet model
+# EXTRACT COEFFICIENTS =============================================================================
+
+#' Extract estimated coefficients from a bsts model
 #'
 #' @inheritParams fable::tidy.ARIMA
 #'
@@ -593,14 +604,14 @@ glance.fbl_prophet <- function(x, ...){
 #' library(dplyr)
 #' fit <- tsibbledata::aus_production %>%
 #'   model(
-#'     prophet = prophet(Beer ~ season("year", 4, type = "multiplicative"))
+#'     bsts = BSTS(Beer ~ season())
 #'   )
 #'
 #' tidy(fit) # coef(fit) or coefficients(fit) can also be used
 #' }
 #'
 #' @export
-tidy.fbl_prophet <- function(x, ...){
+tidy.fbl_bsts <- function(x, ...){
   growth_terms <- c("base_growth", "trend_offset")
 
   seas_terms <- map2(
@@ -633,11 +644,11 @@ tidy.fbl_prophet <- function(x, ...){
 }
 
 #' @export
-model_sum.fbl_prophet <- function(x){
-  "prophet"
+model_sum.fbl_bsts <- function(x){
+  "bsts"
 }
 
 #' @export
-format.fbl_prophet <- function(x, ...){
-  "Prophet Model"
+format.fbl_bsts <- function(x, ...){
+  "Bayesian Structural Time Series Model"
 }
