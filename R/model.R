@@ -4,6 +4,13 @@
 
 globalVariables("self")
 
+#===================================================================================================
+#
+# TRAIN MODEL
+#
+#===================================================================================================
+
+
 #' @importFrom stats predict
 train_bsts <- function(.data, specials, ...) {
   if (length(tsibble::measured_vars(.data)) > 1) {
