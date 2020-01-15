@@ -135,15 +135,19 @@ train_bsts <- function(.data, specials, ...) {
   # SEASONALITY
   #-------------------------------------------------------------------------------------------------
 
+  if ("season" %in% names(specials)) {
+    # Compute number of seasons
+    periods <- common_periods(self$data)
+    nseasons <- get_frequencies(period, self$data, .auto = "smallest")
+    if (nseasons %in% periods) {
+      name <- names(periods)[which(periods == nseasons)]
+    } else {
+      name <- paste0("season_", nseasons)
+    }
 
-  # Compute number of seasons
-  periods <- common_periods(self$data)
-  nseasons <- get_frequencies(period, self$data, .auto = "smallest")
-  if (nseasons %in% periods) {
-    name <- names(periods)[which(periods == nseasons)]
-  } else {
-    name <- paste0("season_", nseasons)
-  }
+    for (season in specials$season) {
+      #---------------------------------------------------------------------------------------------
+      # Regression Seasonality
 
   for (season in specials$season) {
     season_type <- trimws(tolower(season$type))
@@ -156,8 +160,17 @@ train_bsts <- function(.data, specials, ...) {
       state <- AddMonthlyAnnualCycle(state)
     }
 
+      #---------------------------------------------------------------------------------------------
+      # Trigonometric Seasonality
 
-    state <- bsts::AddSeasonal(state, name = season$name, nseasons = season$nseasons)
+
+      #---------------------------------------------------------------------------------------------
+      # Monthly Annual Cyclicality
+
+      } else if (season$type == "monthlyannual") {
+        state <- AddMonthlyAnnualCycle(state)
+      }
+    }
   }
 
 
