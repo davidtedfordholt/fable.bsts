@@ -421,6 +421,8 @@ BSTS <- function(formula, ...){
   new_model_definition(bsts_model, !!enquo(formula), ...)
 }
 
+# FORECAST MODEL ===================================================================================
+
 #' Produce forecasts from the bsts model
 #'
 #' If additional future information is required (such as exogenous variables)
@@ -449,6 +451,8 @@ BSTS <- function(formula, ...){
 forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 1000, ...){
   mdl <- object$model
 
+  # new_data will include a tsibble with the dates for prediction
+
   # Prepare data
   # new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
   # ## Exogenous Regressors
@@ -459,7 +463,7 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   # }
 
   # Compute predictions without intervals
-  pred <- predict(mdl, niter = iterations, horizon = 5)
+  pred <- predict(mdl, niter = iterations, horizon = nrow(new_data))
 
   sim <- list(pred$distribution)
 
