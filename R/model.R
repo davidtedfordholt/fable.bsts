@@ -142,9 +142,36 @@ train_bsts <- function(.data, specials, ...) {
     }
   }
 
+  #-------------------------------------------------------------------------------------------------
+  # SEASONALITY
+  #-------------------------------------------------------------------------------------------------
+
+
+  # Compute number of seasons
+  periods <- common_periods(self$data)
+  nseasons <- get_frequencies(period, self$data, .auto = "smallest")
+  if (nseasons %in% periods) {
+    name <- names(periods)[which(periods == nseasons)]
+  } else {
+    name <- paste0("season_", nseasons)
   }
 
-  # # Holidays
+  for (season in specials$season) {
+    season_type <- trimws(tolower(season$type))
+
+    if (is_missing(season_type) || season_type %in% c("season", "seasonal")) {
+      state <- AddSeasonal(state)
+    } else if (season_type %in% c("trig", "trigonometric", "harmonic")) {
+      state <- AddTrig(state)
+    } else if (season_type %in% c("cycle", "monthlyannual", "monthlyannualcycle")) {
+      state <- AddMonthlyAnnualCycle(state)
+    }
+
+
+    state <- bsts::AddSeasonal(state, name = season$name, nseasons = season$nseasons)
+  }
+
+
   # holiday <- specials$holiday[[1]]
   for (holiday in specials$holiday) {
     holiday_type <- trimws(tolower(holiday$type))
