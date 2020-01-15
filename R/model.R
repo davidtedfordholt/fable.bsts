@@ -195,7 +195,7 @@ train_bsts <- function(.data, specials, ...) {
         time0 = holiday$first_observation,
         sigma.prior = holiday$sigma_prior,
         initial.state.prior = holiday$initial_state_prior
-        )
+      )
     } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
       state <- AddHierarchicalRegressionHoliday(
         state.specification = state,
@@ -204,27 +204,14 @@ train_bsts <- function(.data, specials, ...) {
         coefficient.mean.prior = holiday$coefficient_mean_prior,
         coefficient.variance.prior = holiday$coefficient_variance_prior,
         time0 = holiday$first_observation
-        )
+      )
     }
   }
 
-  # Seasonality
-  for (season in specials$season) {
-    season_type <- trimws(tolower(season$type))
 
-    if (is_missing(season_type) || season_type %in% c("season", "seasonal")) {
-      state <- AddSeasonal(state)
-    } else if (season_type %in% c("trig", "trigonometric", "harmonic")) {
-      state <- AddTrig(state)
-    } else if (season_type %in% c("cycle", "monthlyannual", "monthlyannualcycle")) {
-      state <- AddMonthlyAnnualCycle(state)
-    }
-
-
-    state <- bsts::AddSeasonal(state, name = season$name, nseasons = season$nseasons)
-  }
-
-  # Exogenous Regressors
+  #-------------------------------------------------------------------------------------------------
+  # EXOGENOUS REGRESSORS
+  #-------------------------------------------------------------------------------------------------
 
   xreg_data <-
     if (nrow(xreg_data) != length(vec_data)) {
@@ -245,14 +232,7 @@ train_bsts <- function(.data, specials, ...) {
     }
   }
 
-  # # Model Prior
-  # if ("prior" %in% names(specials)) {
-  #   prior <- specials$prior
-  # } else if ("xreg" %in% names(specials)) {
-  #   prior <- SpikeSlabPrior()
-  # } else {
-  #   prior <- SdPrior()
-  # }
+
 
   # Train model
   mdl <- bsts::bsts(
