@@ -318,14 +318,43 @@ specials_bsts <- new_specials(
 #'
 #' @section Specials:
 #'
-#' \subsection{trend}{
-#' The `trend` special is used to specify the trend parameters.
+#' \subsection{intercept}{
+#' The `intercept` special is used to specify the intercept parameters.
 #' \preformatted{
-#' trend(type = c("linear", "semilocal", "level"))
+#' intercept()
+#' }
+#' }
+#'
+#' \subsection{ar}{
+#' The `ar` special is used to specify the autoregressive parameters.
+#' \preformatted{
+#' ar(lag = NULL)
 #' }
 #'
 #' \tabular{ll}{
-#'   `type`  \tab The type of trend (local linear, semi-local linear or local level).\cr
+#'   `lag`  \tab The number of lags ("p") in the AR(p) process.\cr
+#' }
+#' }
+#'
+#' \subsection{level}{
+#' The `level` special is used to specify the level parameters.
+#' \preformatted{
+#' level(type = c("local", "shared"))
+#' }
+#'
+#' \tabular{ll}{
+#'   `type`  \tab The type of level (local or shared).\cr
+#' }
+#' }
+#'
+#' \subsection{trend}{
+#' The `trend` special is used to specify the trend parameters.
+#' \preformatted{
+#' trend(type = c("locallinear", "semilocallinear", "studentlocallinear"))
+#' }
+#'
+#' \tabular{ll}{
+#'   `type`  \tab The type of trend (local linear, semi-local linear or student local linear).\cr
 #' }
 #' }
 #'
@@ -336,10 +365,11 @@ specials_bsts <- new_specials(
 #' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
 #'
 #' \preformatted{
-#' season(period = NULL)
+#' season(type = c("seasonal", "trig", "monthlyannual"), period = NULL)
 #' }
 #'
 #' \tabular{ll}{
+#'   `type`  \tab The type of seasonality (seasonal regression, trigonometric, or monthly-annual cycle).\cr
 #'   `period`   \tab The periodic nature of the seasonality. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
 #' }
 #' }
