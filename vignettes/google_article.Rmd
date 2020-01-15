@@ -20,10 +20,12 @@ This is a mock-up of how fable-style formulas could be used to express state spe
 This Rmd does not knit!
 
 I'm using the following functions as formula "specials":
-  `trend(type = c("level", "local", "semilocal", "AR"), ...)`
-  `season(nseasons, duration = NULL, ...)`
+  `intercept`
+  `ar(lags = NULL)`
+  `level(type = c("local", "shared"))`
+  `trend(type = c("locallinear", "semilocallinear", "studentlocallinear"), ...)`
+  `season(type = c("regression", "trig", "monthlyannual"), ...)`
   `xreg(data, ...)`
-  `trig(period, frequencies, ...)`
   `holiday(holidays, ...)`
   
 This allows the specification of the state through a formula such as
