@@ -70,33 +70,31 @@ train_bsts <- function(.data, specials, ...) {
     }
   }
 
+  #-------------------------------------------------------------------------------------------------
+  # LEVEL
+  #-------------------------------------------------------------------------------------------------
+
+  if ("level" %in% names(specials)) {
+    # check for level validity
+    if (length(specials$level) > 1) {
+      abort("BSTS only supports a single level argument")
+    }
+
+    level <- specials$level[[1]]
+
+    if (level$type == "locallevel") {
+      state <- AddLocalLevel(
+        state.specification = state,
+        y = vec_data
       )
-  } else if (trend$type %in% c("level", "locallevel")) {
-    state <- AddLocalLevel(
-      state.specification = state,
-      y = vec_data,
-      sigma.prior = trend$sigma_prior,
-      initial.state.prior = trend$initial_state_prior
+    } else if (level$type == "sharedlevel") {
+      state <- AddSharedLocalLevel(
+        state.specification = state,
+        y = vec_data
       )
-  # } else if (trend$type %in% c("shared", "sharedlevel")) {
-  #
-  #
-  #   state <- AddSharedLocalLevel(
-  #     state.specification = state,
-  #     y = vec_data,
-  #     response = response_data,
-  #     nfactors = trend$nfactors,
-  #     coefficient.prior = trend$coefficient_prior,          # from ScaledMatrixNormalPrior
-  #     initial.state.prior = trend$initial_state_prior       # from MvnPrior
-  #     )
-  } else if (trend$type %in% c("locallinear", "linear")) {
-    state <- AddLocalLinearTrend(
-      state.specification = state,
-      y = vec_data,
-      level.sigma.prior = trend$level_sigma_prior,
-      slope.sigma.prior = trend$slope_sigma_prior,
-      initial.level.prior = trend$initial_level_prior,
-      initial.slope.prior = trend$initial_slope_prior
+    }
+  }
+
       )
   } else if (trend$type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
     state <- AddSemilocalLinearTrend(
