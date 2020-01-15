@@ -34,6 +34,11 @@ train_bsts <- function(.data, specials, ...) {
     if (length(specials$intercept) > 1) {
       abort("BSTS only supports a single intercept argument")
     }
+    if ("level" %in% names(specials) || "trend" %in% names(specials)) {
+      abort("If the model includes a traditional trend component (e.g. local level, local linear
+            trend, etc) then a separate intercept is not needed (and will probably cause trouble,
+            as it will be confounded with the initial state of the trend model).")
+    }
 
     intercept <- specials$intercept[[1]]
 
@@ -160,36 +165,38 @@ train_bsts <- function(.data, specials, ...) {
   # HOLIDAYS
   #-------------------------------------------------------------------------------------------------
 
-  # holiday <- specials$holiday[[1]]
-  for (holiday in specials$holiday) {
-    holiday_type <- trimws(tolower(holiday$type))
-
-    if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
-      state <- AddRegressionHoliday(
-        state.specification = state,
-        y = vec_data,
-        holiday.list = holiday$holidays_list,
-        time0 = holiday$first_observation,
-        prior = holiday$prior)
-    } else if (holiday_type %in% c("randomwalk", "rw")) {
-      state <- AddRandomWalkHoliday(
-        state.specification = state,
-        y = vec_data,
-        holiday = holiday$holidays_list,
-        time0 = holiday$first_observation,
-        sigma.prior = holiday$sigma_prior,
-        initial.state.prior = holiday$initial_state_prior
-      )
-    } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
-      state <- AddHierarchicalRegressionHoliday(
-        state.specification = state,
-        y = vec_data,
-        holiday.list = holiday$holidays_list,
-        coefficient.mean.prior = holiday$coefficient_mean_prior,
-        coefficient.variance.prior = holiday$coefficient_variance_prior,
-        time0 = holiday$first_observation
-      )
-    }
+  if ("holiday" %in% names(specials)) {
+    # holiday <- specials$holiday[[1]]
+    # for (holiday in specials$holiday) {
+    #   holiday_type <- trimws(tolower(holiday$type))
+    #
+    #   if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
+    #     state <- AddRegressionHoliday(
+    #       state.specification = state,
+    #       y = vec_data,
+    #       holiday.list = holiday$holidays_list,
+    #       time0 = holiday$first_observation,
+    #       prior = holiday$prior)
+    #   } else if (holiday_type %in% c("randomwalk", "rw")) {
+    #     state <- AddRandomWalkHoliday(
+    #       state.specification = state,
+    #       y = vec_data,
+    #       holiday = holiday$holidays_list,
+    #       time0 = holiday$first_observation,
+    #       sigma.prior = holiday$sigma_prior,
+    #       initial.state.prior = holiday$initial_state_prior
+    #     )
+    #   } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
+    #     state <- AddHierarchicalRegressionHoliday(
+    #       state.specification = state,
+    #       y = vec_data,
+    #       holiday.list = holiday$holidays_list,
+    #       coefficient.mean.prior = holiday$coefficient_mean_prior,
+    #       coefficient.variance.prior = holiday$coefficient_variance_prior,
+    #       time0 = holiday$first_observation
+    #     )
+    #   }
+    # }
   }
 
 
