@@ -239,13 +239,8 @@ train_bsts <- function(.data, specials, ...) {
   mdl <- bsts::bsts(
     vec_data,
     state.specification = state,
-    # family = family,
-    # data = xts_data,
-    # prior = prior,
     niter = iterations
   )
-
-  fits <- predict(mdl)
 
   # RETURN MODEL -----------------------------------------------------------------------------------
 
