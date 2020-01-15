@@ -476,10 +476,10 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   mdl <- object$model
 
   # Prepare data
-  new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
+  # new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
 
   ## trend
-  trend <- specials$trend[[1]]
+  # trend <- specials$trend[[1]]
 
   # ## Exogenous Regressors
   # for(regressor in specials$xreg){
@@ -489,13 +489,13 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   # }
 
   # Compute predictions without intervals
-  mdl$uncertainty.samples <- 0
-  pred <- predict(mdl, new_data)
+  # mdl$uncertainty.samples <- 0
+  pred <- predict(mdl, niter = iterations)
 
   # Simulate future paths
-  mdl$niter <- iterations
-  sim <- prophet::predictive_samples(mdl, new_data, ...)$yhat
-  sim <- split(sim, row(sim))
+
+  # sim <- prophet::predictive_samples(mdl, new_data, ...)$yhat
+  # sim <- split(sim, row(sim))
 
   # Return forecasts
   construct_fc(pred$yhat, unname(map_dbl(sim, stats::sd)), dist_sim(sim))
