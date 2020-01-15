@@ -24,15 +24,25 @@ train_bsts <- function(.data, specials, ...) {
   # Initialize state specification
   state <- list()
 
-  # Trend
-  trend <- specials$trend[[1]]
-  trend$type <- trimws(tolower(trend$type))
+  #-------------------------------------------------------------------------------------------------
+  # INTERCEPT
+  #-------------------------------------------------------------------------------------------------
 
-  if (is_missing(trend$type) || trend$type %in% c("static", "intercept", "staticintercept")) {
+  if ("intercept" %in% names(specials)) {
+
+    # check intercept validity
+    if (length(specials$intercept) > 1) {
+      abort("BSTS only supports a single intercept argument")
+    }
+
+    intercept <- specials$intercept[[1]]
+
     state <- AddStaticIntercept(
       state.specification = state,
-      y = vec_data,
-      initial.state.prior = trend$initial_state_prior       # from NormalPrior()
+      y = vec_data
+    )
+  }
+
       )
   } else if (trend$type == "autoar" ||
              (trend$type == "ar" && is_missing(trend$lags))) {
