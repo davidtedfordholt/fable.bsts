@@ -149,16 +149,17 @@ train_bsts <- function(.data, specials, ...) {
       #---------------------------------------------------------------------------------------------
       # Regression Seasonality
 
-  for (season in specials$season) {
-    season_type <- trimws(tolower(season$type))
+      if (season$type == "regression") {
+        # check validity
+        if (!"period" %in% names(season)) {
+          abort("period must be defined for regression seasonality.")
+        }
 
-    if (is_missing(season_type) || season_type %in% c("season", "seasonal")) {
-      state <- AddSeasonal(state)
-    } else if (season_type %in% c("trig", "trigonometric", "harmonic")) {
-      state <- AddTrig(state)
-    } else if (season_type %in% c("cycle", "monthlyannual", "monthlyannualcycle")) {
-      state <- AddMonthlyAnnualCycle(state)
-    }
+        state <- AddSeasonal(
+          state.specification = state,
+          y = vec_data,
+          nseasons = season$nseasons
+        )
 
       #---------------------------------------------------------------------------------------------
       # Trigonometric Seasonality
