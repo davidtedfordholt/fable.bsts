@@ -110,34 +110,18 @@ train_bsts <- function(.data, specials, ...) {
     if (trend$type == "locallinear") {
       state <- AddLocalLinearTrend(
         state.specification = state,
-        y = vec_data,
-        level.sigma.prior = trend$level_sigma_prior,
-        slope.sigma.prior = trend$slope_sigma_prior,
-        initial.level.prior = trend$initial_level_prior,
-        initial.slope.prior = trend$initial_slope_prior
+        y = vec_data
       )
     } else if (trend$type == "semilocallinear") {
       state <- AddSemilocalLinearTrend(
         state.specification = state,
-        y = vec_data,
-        level.sigma.prior = trend$level_sigma_prior,            # from SdPrior
-        slope.mean.prior = trend$slope_mean_prior,              # from NormalPrior
-        slope.ar1.prior = trend$slope_ar1_prior,                # from Ar1CoefficientPrior
-        slope.sigma.prior = trend$slope_sigma_prior,            # from SdPrior
-        initial.level.prior = trend$initial_level_prior,        # from NormalPrior
-        initial.slope.prior = trend$initial_slope_prior,        # from NormalPrior
+        y = vec_data
       )
     } else if (trend$type == "studentlocallinear") {
       state <- AddStudentLocalLinearTrend(
         state.specification = state,
         y = vec_data,
-        save.weights = FALSE,
-        level.sigma.prior = trend$level_sigma_prior,
-        level.nu.prior = trend$level_nu_prior,
-        slope.sigma.prior = trend$slope_sigma_prior,
-        slope.nu.prior = trend$slope_nu_prior,
-        initial.level.prior = trend$initial_level_prior,
-        initial.slope.prior = trend$initial_slope_prior
+        save.weights = FALSE
       )
     }
   }
