@@ -260,20 +260,23 @@ train_bsts <- function(.data, specials, ...) {
 
   # Train model
   mdl <- bsts::bsts(
+    vec_data,
     state.specification = state,
-    family = family,
-    data = xts_data,
-    prior = prior,
+    # family = family,
+    # data = xts_data,
+    # prior = prior,
     niter = iterations
   )
-  fits <- predict(mdl, model_data)
+  fits <- predict(mdl)
 
   # Return model
   structure(
     list(
-      model = mdl,
-      est = list(.fitted = fits$yhat, .resid = vec_data - fits$yhat),
-      components = .data %>% mutate(!!!(fits[c("trend", names(mdl$seasonalities))]))),
+      model = mdl
+      ,est = list(.fitted = vec_data - colMeans(mdl$one.step.prediction.errors[1:10, 1:10]),
+                 .resid = colMeans(mdl$one.step.prediction.errors[1:10, 1:10]))
+      # ,components = .data %>% mutate(!!!(fits[c("trend", names(mdl$seasonalities))]))
+      ),
     class = "fbl_bsts")
 }
 
