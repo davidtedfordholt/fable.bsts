@@ -172,6 +172,10 @@ train_bsts <- function(.data, specials, ...) {
   }
 
 
+  #-------------------------------------------------------------------------------------------------
+  # HOLIDAYS
+  #-------------------------------------------------------------------------------------------------
+
   # holiday <- specials$holiday[[1]]
   for (holiday in specials$holiday) {
     holiday_type <- trimws(tolower(holiday$type))
