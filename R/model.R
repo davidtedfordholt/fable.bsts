@@ -360,7 +360,7 @@ specials_bsts <- new_specials(
 #' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
 #'
 #' \preformatted{
-#' season(type = c("seasonal", "trig", "monthlyannual"), period = NULL)
+#' season(type = c("regression", "trig", "monthlyannual"), period = NULL)
 #' }
 #'
 #' \tabular{ll}{
