@@ -95,30 +95,53 @@ train_bsts <- function(.data, specials, ...) {
     }
   }
 
+  #-------------------------------------------------------------------------------------------------
+  # TREND
+  #-------------------------------------------------------------------------------------------------
+
+  if ("trend" %in% names(specials)) {
+    # check for trend validity
+    if (length(specials$trend) > 1) {
+      abort("BSTS only supports a single trend argument")
+    }
+
+    trend <- specials$trend[[1]]
+
+    if (trend$type == "locallinear") {
+      state <- AddLocalLinearTrend(
+        state.specification = state,
+        y = vec_data,
+        level.sigma.prior = trend$level_sigma_prior,
+        slope.sigma.prior = trend$slope_sigma_prior,
+        initial.level.prior = trend$initial_level_prior,
+        initial.slope.prior = trend$initial_slope_prior
       )
-  } else if (trend$type %in% c("semi", "semilocal", "semi-local", "semilocallinear")) {
-    state <- AddSemilocalLinearTrend(
-      state.specification = state,
-      y = vec_data,
-      level.sigma.prior = trend$level_sigma_prior,            # from SdPrior
-      slope.mean.prior = trend$slope_mean_prior,              # from NormalPrior
-      slope.ar1.prior = trend$slope_ar1_prior,                # from Ar1CoefficientPrior
-      slope.sigma.prior = trend$slope_sigma_prior,            # from SdPrior
-      initial.level.prior = trend$initial_level_prior,        # from NormalPrior
-      initial.slope.prior = trend$initial_slope_prior,        # from NormalPrior
+    } else if (trend$type == "semilocallinear") {
+      state <- AddSemilocalLinearTrend(
+        state.specification = state,
+        y = vec_data,
+        level.sigma.prior = trend$level_sigma_prior,            # from SdPrior
+        slope.mean.prior = trend$slope_mean_prior,              # from NormalPrior
+        slope.ar1.prior = trend$slope_ar1_prior,                # from Ar1CoefficientPrior
+        slope.sigma.prior = trend$slope_sigma_prior,            # from SdPrior
+        initial.level.prior = trend$initial_level_prior,        # from NormalPrior
+        initial.slope.prior = trend$initial_slope_prior,        # from NormalPrior
       )
-  } else if (trend$type %in% c("student", "studentlocal", "studentlinear", "studentlocallinear")) {
-    state <- AddStudentLocalLinearTrend(
-      state.specification = state,
-      y = vec_data,
-      save.weights = FALSE,
-      level.sigma.prior = trend$level_sigma_prior,
-      level.nu.prior = trend$level_nu_prior,
-      slope.sigma.prior = trend$slope_sigma_prior,
-      slope.nu.prior = trend$slope_nu_prior,
-      initial.level.prior = trend$initial_level_prior,
-      initial.slope.prior = trend$initial_slope_prior
+    } else if (trend$type == "studentlocallinear") {
+      state <- AddStudentLocalLinearTrend(
+        state.specification = state,
+        y = vec_data,
+        save.weights = FALSE,
+        level.sigma.prior = trend$level_sigma_prior,
+        level.nu.prior = trend$level_nu_prior,
+        slope.sigma.prior = trend$slope_sigma_prior,
+        slope.nu.prior = trend$slope_nu_prior,
+        initial.level.prior = trend$initial_level_prior,
+        initial.slope.prior = trend$initial_slope_prior
       )
+    }
+  }
+
   }
 
   # # Holidays
