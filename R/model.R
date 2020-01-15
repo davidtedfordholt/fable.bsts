@@ -135,124 +135,124 @@ train_bsts <- function(.data, specials, ...) {
   # SEASONALITY
   #-------------------------------------------------------------------------------------------------
 
-  if ("season" %in% names(specials)) {
-    # Compute number of seasons
-    periods <- common_periods(self$data)
-    nseasons <- get_frequencies(period, self$data, .auto = "smallest")
-    if (nseasons %in% periods) {
-      name <- names(periods)[which(periods == nseasons)]
-    } else {
-      name <- paste0("season_", nseasons)
-    }
-
-    for (season in specials$season) {
-      #---------------------------------------------------------------------------------------------
-      # Regression Seasonality
-
-      if (season$type == "regression") {
-        # check validity
-        if (!"period" %in% names(season)) {
-          abort("period must be defined for regression seasonality.")
-        }
-
-        state <- AddSeasonal(
-          state.specification = state,
-          y = vec_data,
-          nseasons = season$nseasons
-        )
-
-      #---------------------------------------------------------------------------------------------
-      # Trigonometric Seasonality
-
-      } else if (season$type == "trig") {
-        # check validity
-        if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
-          abort("period and frequencies must be defined for trig seasonality.")
-        }
-        if (!season$period > 0 || any(!frequencies > 0)) {
-          abort("period and frequencies must be positive for trig seasonality.")
-        }
-
-        state <- AddTrig(
-          state.specification = state,
-          y = vec_data,
-          period = season$period,
-          frequencies = season$frequencies
-        )
-
-      #---------------------------------------------------------------------------------------------
-      # Monthly Annual Cyclicality
-
-      } else if (season$type == "monthlyannual") {
-        state <- AddMonthlyAnnualCycle(state)
-      }
-    }
-  }
+  # if ("season" %in% names(specials)) {
+  #   # Compute number of seasons
+  #   periods <- common_periods(self$data)
+  #   nseasons <- get_frequencies(period, self$data, .auto = "smallest")
+  #   if (nseasons %in% periods) {
+  #     name <- names(periods)[which(periods == nseasons)]
+  #   } else {
+  #     name <- paste0("season_", nseasons)
+  #   }
+  #
+  #   for (season in specials$season) {
+  #     #---------------------------------------------------------------------------------------------
+  #     # Regression Seasonality
+  #
+  #     if (season$type == "regression") {
+  #       # check validity
+  #       if (!"period" %in% names(season)) {
+  #         abort("period must be defined for regression seasonality.")
+  #       }
+  #
+  #       state <- AddSeasonal(
+  #         state.specification = state,
+  #         y = vec_data,
+  #         nseasons = season$nseasons
+  #       )
+  #
+  #     #---------------------------------------------------------------------------------------------
+  #     # Trigonometric Seasonality
+  #
+  #     } else if (season$type == "trig") {
+  #       # check validity
+  #       if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
+  #         abort("period and frequencies must be defined for trig seasonality.")
+  #       }
+  #       if (!season$period > 0 || any(!frequencies > 0)) {
+  #         abort("period and frequencies must be positive for trig seasonality.")
+  #       }
+  #
+  #       state <- AddTrig(
+  #         state.specification = state,
+  #         y = vec_data,
+  #         period = season$period,
+  #         frequencies = season$frequencies
+  #       )
+  #
+  #     #---------------------------------------------------------------------------------------------
+  #     # Monthly Annual Cyclicality
+  #
+  #     } else if (season$type == "monthlyannual") {
+  #       state <- AddMonthlyAnnualCycle(state)
+  #     }
+  #   }
+  # }
 
 
   #-------------------------------------------------------------------------------------------------
   # HOLIDAYS
   #-------------------------------------------------------------------------------------------------
 
-  if ("holiday" %in% names(specials)) {
-    # holiday <- specials$holiday[[1]]
-    # for (holiday in specials$holiday) {
-    #   holiday_type <- trimws(tolower(holiday$type))
-    #
-    #   if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
-    #     state <- AddRegressionHoliday(
-    #       state.specification = state,
-    #       y = vec_data,
-    #       holiday.list = holiday$holidays_list,
-    #       time0 = holiday$first_observation,
-    #       prior = holiday$prior)
-    #   } else if (holiday_type %in% c("randomwalk", "rw")) {
-    #     state <- AddRandomWalkHoliday(
-    #       state.specification = state,
-    #       y = vec_data,
-    #       holiday = holiday$holidays_list,
-    #       time0 = holiday$first_observation,
-    #       sigma.prior = holiday$sigma_prior,
-    #       initial.state.prior = holiday$initial_state_prior
-    #     )
-    #   } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
-    #     state <- AddHierarchicalRegressionHoliday(
-    #       state.specification = state,
-    #       y = vec_data,
-    #       holiday.list = holiday$holidays_list,
-    #       coefficient.mean.prior = holiday$coefficient_mean_prior,
-    #       coefficient.variance.prior = holiday$coefficient_variance_prior,
-    #       time0 = holiday$first_observation
-    #     )
-    #   }
-    # }
-  }
+  # if ("holiday" %in% names(specials)) {
+  #   holiday <- specials$holiday[[1]]
+  #   for (holiday in specials$holiday) {
+  #     holiday_type <- trimws(tolower(holiday$type))
+  #
+  #     if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
+  #       state <- AddRegressionHoliday(
+  #         state.specification = state,
+  #         y = vec_data,
+  #         holiday.list = holiday$holidays_list,
+  #         time0 = holiday$first_observation,
+  #         prior = holiday$prior)
+  #     } else if (holiday_type %in% c("randomwalk", "rw")) {
+  #       state <- AddRandomWalkHoliday(
+  #         state.specification = state,
+  #         y = vec_data,
+  #         holiday = holiday$holidays_list,
+  #         time0 = holiday$first_observation,
+  #         sigma.prior = holiday$sigma_prior,
+  #         initial.state.prior = holiday$initial_state_prior
+  #       )
+  #     } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
+  #       state <- AddHierarchicalRegressionHoliday(
+  #         state.specification = state,
+  #         y = vec_data,
+  #         holiday.list = holiday$holidays_list,
+  #         coefficient.mean.prior = holiday$coefficient_mean_prior,
+  #         coefficient.variance.prior = holiday$coefficient_variance_prior,
+  #         time0 = holiday$first_observation
+  #       )
+  #     }
+  #   }
+  # }
 
 
   #-------------------------------------------------------------------------------------------------
   # EXOGENOUS REGRESSORS
   #-------------------------------------------------------------------------------------------------
 
-  if ("xreg" %in% names(specials)) {
-    xreg_data <-
-      if (nrow(xreg_data) != length(vec_data)) {
-        abort("The number of observations in ")
-      }
-
-    for(regressor in specials$xreg){
-      for(nm in colnames(regressor$xreg)){
-        model_data[nm] <- regressor$xreg[,nm]
-
-        if (nrow(xreg_data) != length(vec_data)) {
-          abort("The number of observations in ")
-        }
-
-
-        state <- bsts::AddDynamicRegression(
-          state, name = nm, )
-      }
-    }
-  }
+  # if ("xreg" %in% names(specials)) {
+  #   xreg_data <-
+  #     if (nrow(xreg_data) != length(vec_data)) {
+  #       abort("The number of observations in ")
+  #     }
+  #
+  #   for(regressor in specials$xreg){
+  #     for(nm in colnames(regressor$xreg)){
+  #       model_data[nm] <- regressor$xreg[,nm]
+  #
+  #       if (nrow(xreg_data) != length(vec_data)) {
+  #         abort("The number of observations in ")
+  #       }
+  #
+  #
+  #       state <- bsts::AddDynamicRegression(
+  #         state, name = nm, )
+  #     }
+  #   }
+  # }
 
 
 
