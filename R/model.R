@@ -477,10 +477,6 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
 
   # Prepare data
   # new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
-
-  ## trend
-  # trend <- specials$trend[[1]]
-
   # ## Exogenous Regressors
   # for(regressor in specials$xreg){
   #   for(nm in colnames(regressor$xreg)){
@@ -492,13 +488,12 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   # mdl$uncertainty.samples <- 0
   pred <- predict(mdl, niter = iterations)
 
-  # Simulate future paths
-
-  # sim <- prophet::predictive_samples(mdl, new_data, ...)$yhat
-  # sim <- split(sim, row(sim))
-
   # Return forecasts
-  construct_fc(pred$yhat, unname(map_dbl(sim, stats::sd)), dist_sim(sim))
+  construct_fc(
+    point = pred$mean,
+    sd = unname(map_dbl(pred$distribution, stats::sd)),
+    dist = dist_sim(pred$distribution)
+  )
 }
 
 #' Extract fitted values
