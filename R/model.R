@@ -290,18 +290,18 @@ specials_bsts <- new_specials(
   intercept = function() {
     as.list(environment())
   }
-  ,ar = function(lags = NULL) {
-    type <- match.arg(type)
-    as.list(environment())
-  }
-  ,level = function(type = c("local", "shared")) {
-    type <- match.arg(type)
-    as.list(environment())
-  }
-  ,trend = function(type = c("local", "semilocal", "studentlocal")){
-    type <- match.arg(type)
-    as.list(environment())
-  }
+  # ,ar = function(lags = NULL) {
+  #   type <- match.arg(type)
+  #   as.list(environment())
+  # }
+  # ,level = function(type = c("local", "shared")) {
+  #   type <- match.arg(type)
+  #   as.list(environment())
+  # }
+  # ,trend = function(type = c("local", "semilocal", "studentlocal")){
+  #   type <- match.arg(type)
+  #   as.list(environment())
+  # }
   # ,season = function(type = c("regression", "trig", "monthlyannual"), period = NULL){
   #   type <- match.arg(type)
   #   as.list(environment())
