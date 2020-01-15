@@ -266,7 +266,7 @@ specials_bsts <- new_specials(
     type <- match.arg(type)
     as.list(environment())
   },
-  season = function(type = c("seasonal", "trig", "monthlyannual"), period = NULL){
+  season = function(type = c("regression", "trig", "monthlyannual"), period = NULL){
     type <- match.arg(type)
     as.list(environment())
   }
