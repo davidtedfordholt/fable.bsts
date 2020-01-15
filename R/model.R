@@ -52,84 +52,84 @@ train_bsts <- function(.data, specials, ...) {
   # AR and AUTOAR
   #-------------------------------------------------------------------------------------------------
 
-  if ("ar" %in% names(specials)) {
-
-    # check intercept validity
-    if (length(specials$ar) > 1) {
-      abort("BSTS only supports a single AR argument")
-    }
-
-    ar <- specials$ar[[1]]
-
-    if (!"lags" %in% names(trend)) {
-      state <- AddAutoAr(
-        state.specification = state,
-        y = vec_data
-      )
-    } else if (trend$type == "ar") {
-      state <- AddAr(
-        state.specification = state,
-        y = vec_data,
-        lags = trend$lags
-      )
-    }
-  }
+  # if ("ar" %in% names(specials)) {
+  #
+  #   # check intercept validity
+  #   if (length(specials$ar) > 1) {
+  #     abort("BSTS only supports a single AR argument")
+  #   }
+  #
+  #   ar <- specials$ar[[1]]
+  #
+  #   if (!"lags" %in% names(trend)) {
+  #     state <- AddAutoAr(
+  #       state.specification = state,
+  #       y = vec_data
+  #     )
+  #   } else if (trend$type == "ar") {
+  #     state <- AddAr(
+  #       state.specification = state,
+  #       y = vec_data,
+  #       lags = trend$lags
+  #     )
+  #   }
+  # }
 
   #-------------------------------------------------------------------------------------------------
   # LEVEL
   #-------------------------------------------------------------------------------------------------
 
-  if ("level" %in% names(specials)) {
-    # check for level validity
-    if (length(specials$level) > 1) {
-      abort("BSTS only supports a single level argument")
-    }
-
-    level <- specials$level[[1]]
-
-    if (level$type == "locallevel") {
-      state <- AddLocalLevel(
-        state.specification = state,
-        y = vec_data
-      )
-    } else if (level$type == "sharedlevel") {
-      state <- AddSharedLocalLevel(
-        state.specification = state,
-        y = vec_data
-      )
-    }
-  }
+  # if ("level" %in% names(specials)) {
+  #   # check for level validity
+  #   if (length(specials$level) > 1) {
+  #     abort("BSTS only supports a single level argument")
+  #   }
+  #
+  #   level <- specials$level[[1]]
+  #
+  #   if (level$type == "locallevel") {
+  #     state <- AddLocalLevel(
+  #       state.specification = state,
+  #       y = vec_data
+  #     )
+  #   } else if (level$type == "sharedlevel") {
+  #     state <- AddSharedLocalLevel(
+  #       state.specification = state,
+  #       y = vec_data
+  #     )
+  #   }
+  # }
 
   #-------------------------------------------------------------------------------------------------
   # TREND
   #-------------------------------------------------------------------------------------------------
 
-  if ("trend" %in% names(specials)) {
-    # check for trend validity
-    if (length(specials$trend) > 1) {
-      abort("BSTS only supports a single trend argument")
-    }
-
-    trend <- specials$trend[[1]]
-
-    if (trend$type == "local") {
-      state <- AddLocalLinearTrend(
-        state.specification = state,
-        y = vec_data
-      )
-    } else if (trend$type == "semilocal") {
-      state <- AddSemilocalLinearTrend(
-        state.specification = state,
-        y = vec_data
-      )
-    } else if (trend$type == "studentlocal") {
-      state <- AddStudentLocalLinearTrend(
-        state.specification = state,
-        y = vec_data,
-        save.weights = FALSE
-      )
-    }
-  }
+  # if ("trend" %in% names(specials)) {
+  #   # check for trend validity
+  #   if (length(specials$trend) > 1) {
+  #     abort("BSTS only supports a single trend argument")
+  #   }
+  #
+  #   trend <- specials$trend[[1]]
+  #
+  #   if (trend$type == "local") {
+  #     state <- AddLocalLinearTrend(
+  #       state.specification = state,
+  #       y = vec_data
+  #     )
+  #   } else if (trend$type == "semilocal") {
+  #     state <- AddSemilocalLinearTrend(
+  #       state.specification = state,
+  #       y = vec_data
+  #     )
+  #   } else if (trend$type == "studentlocal") {
+  #     state <- AddStudentLocalLinearTrend(
+  #       state.specification = state,
+  #       y = vec_data,
+  #       save.weights = FALSE
+  #     )
+  #   }
+  # }
 
   #-------------------------------------------------------------------------------------------------
   # SEASONALITY
