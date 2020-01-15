@@ -234,9 +234,8 @@ train_bsts <- function(.data, specials, ...) {
 
 
 
+  # TRAIN MODEL ------------------------------------------------------------------------------------
 
-
-  # Train model
   mdl <- bsts::bsts(
     vec_data,
     state.specification = state,
@@ -245,24 +244,24 @@ train_bsts <- function(.data, specials, ...) {
     # prior = prior,
     niter = iterations
   )
+
   fits <- predict(mdl)
 
-  # Return model
+  # RETURN MODEL -----------------------------------------------------------------------------------
+
   structure(
     list(
       model = mdl
-      ,est = list(.fitted = vec_data - colMeans(mdl$one.step.prediction.errors[1:10, 1:10]),
-                 .resid = colMeans(mdl$one.step.prediction.errors[1:10, 1:10]))
-      # ,components = .data %>% mutate(!!!(fits[c("trend", names(mdl$seasonalities))]))
+      ,est = list(
+        .fitted = vec_data - colMeans(mdl$one.step.prediction.errors),
+        .resid = colMeans(mdl$one.step.prediction.errors)
+      )
+      ,components = cbind.data.frame(.data, t(colMeans(mdl$state.contributions)))
       ),
     class = "fbl_bsts")
 }
 
-#===================================================================================================
-#
-# SPECIALS
-#
-#===================================================================================================
+# SPECIALS =========================================================================================
 
 specials_bsts <- new_specials(
   intercept = function() {
