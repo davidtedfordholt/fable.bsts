@@ -204,24 +204,28 @@ train_bsts <- function(.data, specials, ...) {
   # EXOGENOUS REGRESSORS
   #-------------------------------------------------------------------------------------------------
 
-  xreg_data <-
-    if (nrow(xreg_data) != length(vec_data)) {
-      abort("The number of observations in ")
-    }
-
-  for(regressor in specials$xreg){
-    for(nm in colnames(regressor$xreg)){
-      model_data[nm] <- regressor$xreg[,nm]
-
+  if ("xreg" %in% names(specials)) {
+    xreg_data <-
       if (nrow(xreg_data) != length(vec_data)) {
         abort("The number of observations in ")
       }
 
+    for(regressor in specials$xreg){
+      for(nm in colnames(regressor$xreg)){
+        model_data[nm] <- regressor$xreg[,nm]
 
-      state <- bsts::AddDynamicRegression(
-        state, name = nm, )
+        if (nrow(xreg_data) != length(vec_data)) {
+          abort("The number of observations in ")
+        }
+
+
+        state <- bsts::AddDynamicRegression(
+          state, name = nm, )
+      }
     }
   }
+
+
 
 
 
