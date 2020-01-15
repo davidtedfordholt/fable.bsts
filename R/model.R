@@ -464,14 +464,15 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
   # }
 
   # Compute predictions without intervals
-  # mdl$uncertainty.samples <- 0
-  pred <- predict(mdl, niter = iterations)
+  pred <- predict(mdl, niter = iterations, horizon = 5)
+
+  sim <- list(pred$distribution)
 
   # Return forecasts
   construct_fc(
     point = pred$mean,
-    sd = unname(map_dbl(pred$distribution, stats::sd)),
-    dist = dist_sim(pred$distribution)
+    sd = apply(pred$distribution, 2, stats::sd),
+    dist = dist_sim(sim)
   )
 }
 
