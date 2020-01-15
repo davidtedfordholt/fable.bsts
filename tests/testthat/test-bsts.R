@@ -1,8 +1,8 @@
-context("test-prophet")
+context("test-bsts")
 library(dplyr)
 
-test_that("Prophet simple", {
-  default <- model(tsibble::as_tsibble(USAccDeaths), prophet(value ~ season("year")))
+test_that("bsts simple", {
+  default <- model(tsibble::as_tsibble(USAccDeaths), BSTS(value ~ season("year")))
   expect_s3_class(default, "mdl_df")
   default_mdl <- default[[1]][[1]]$fit$model
   expect_length(default_mdl$seasonalities, 1)
@@ -14,7 +14,7 @@ test_that("Prophet simple", {
   expect_equal(NROW(default_fc), 17)
 })
 
-test_that("Prophet complex", {
+test_that("bsts complex", {
   skip_if_not_installed("tsibbledata")
   vic_elec <- tsibbledata::vic_elec %>%
     filter(lubridate::year(Time) == 2014)
@@ -26,9 +26,11 @@ test_that("Prophet complex", {
     date = structure(c(16071, 16097, 16178, 16181, 16185, 16429, 16430), class = "Date"),
     index = date)
   complex <- model(elec_tr,
-                   fit = prophet(Demand ~ growth('logistic', capacity = 10, floor = 2.5) +
-                                   season("week", 3) + season("year", 12) + Temperature +
-                                   holiday(aus_holidays))
+                   fit = bsts(Demand ~ trend("linear") +
+                              season("week", 3) +
+                              season("year", 12) +
+                              Temperature +
+                              holiday(aus_holidays))
   )
 
   expect_s3_class(complex, "mdl_df")
