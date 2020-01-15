@@ -26,7 +26,7 @@ test_that("bsts complex", {
     date = structure(c(16071, 16097, 16178, 16181, 16185, 16429, 16430), class = "Date"),
     index = date)
   complex <- model(elec_tr,
-                   fit = bsts(Demand ~ trend("linear") +
+                   fit = BSTS(Demand ~ trend("linear") +
                               season("week", 3) +
                               season("year", 12) +
                               Temperature +
