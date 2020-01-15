@@ -253,44 +253,49 @@ train_bsts <- function(.data, specials, ...) {
     class = "fbl_bsts")
 }
 
+#===================================================================================================
+#
+# SPECIALS
+#
+#===================================================================================================
+
 specials_bsts <- new_specials(
-  trend = function(type = c("linear", "semilocal", "level")){
+  intercept = function() {
+    as.list(environment())
+  },
+  ar = function(lags = NULL) {
     type <- match.arg(type)
     as.list(environment())
   },
-  season = function(period = NULL){
-    # Compute number of seasons
-    periods <- common_periods(self$data)
-    nseasons <- get_frequencies(period, self$data, .auto = "smallest")
-    if (nseasons %in% periods) {
-      name <- names(periods)[which(periods == nseasons)]
-    } else {
-      name <- paste0("season_", nseasons)
-    }
-    rm(periods)
+  level = function(type = c("local", "shared")) {
+    type <- match.arg(type)
+    as.list(environment())
+  },
+  trend = function(type = c("locallinear", "semilocallinear", "studentlocallinear")){
+    type <- match.arg(type)
+    as.list(environment())
+  },
+  season = function(type = c("seasonal", "trig", "monthlyannual"), period = NULL){
+    type <- match.arg(type)
     as.list(environment())
   }
-  # holiday = function(holiday.list = NULL) {
-  #
-  #   # holidays have to be specified with the holiday function, and they need the same
-  #   # amount of dats before and after in a set, so they need to be parsed from the
-  #   # list given in the manner that prophet allows.
-  #
-  # },
-  # xreg = function(..., lags = 1, standardize = "auto", type = NULL){
-  #   model_formula <- new_formula(
-  #     lhs = NULL,
-  #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
-  #   )
-  #   list(
-  #     xreg = model.matrix(model_formula, self$data),
-  #     prior_scale = prior_scale,
-  #     standardize = standardize,
-  #     mode = type
-  #   )
-  # },
-  # prior = function()
-  # .required_specials = c("trend", "season")
+  holiday = function(type = c("regression", "randomwalk", "hierarchical"),
+                     holiday_tbl = NULL, holiday_names = NULL) {
+    type <- match.arg(type)
+    as.list(environment())
+  },
+  xreg = function(..., lags = 1, standardize = "auto", type = NULL){
+    model_formula <- new_formula(
+      lhs = NULL,
+      rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
+    )
+    list(
+      xreg = model.matrix(model_formula, self$data),
+      prior_scale = prior_scale,
+      standardize = standardize,
+      mode = type
+    )
+  }
 )
 
 #' bsts procedure modelling
