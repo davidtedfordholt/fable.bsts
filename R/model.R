@@ -217,8 +217,8 @@ train_bsts <- function(.data, specials, ...) {
   #       abort("The number of observations in ")
   #     }
   #
-  #   for(regressor in specials$xreg){
-  #     for(nm in colnames(regressor$xreg)){
+  #   for(regressor in specials$xreg) {
+  #     for(nm in colnames(regressor$xreg)) {
   #       model_data[nm] <- regressor$xreg[,nm]
   #
   #       if (nrow(xreg_data) != length(vec_data)) {
@@ -270,11 +270,11 @@ specials_bsts <- new_specials(
   #   type <- match.arg(type)
   #   as.list(environment())
   # }
-  # ,trend = function(type = c("local", "semilocal", "studentlocal")){
+  # ,trend = function(type = c("local", "semilocal", "studentlocal")) {
   #   type <- match.arg(type)
   #   as.list(environment())
   # }
-  # ,season = function(type = c("regression", "trig", "monthlyannual"), period = NULL){
+  # ,season = function(type = c("regression", "trig", "monthlyannual"), period = NULL) {
   #   type <- match.arg(type)
   #   as.list(environment())
   # }
@@ -283,7 +283,7 @@ specials_bsts <- new_specials(
   #   type <- match.arg(type)
   #   as.list(environment())
   # }
-  # ,xreg = function(..., lags = 1, standardize = "auto", type = NULL){
+  # ,xreg = function(..., lags = 1, standardize = "auto", type = NULL) {
   #   model_formula <- new_formula(
   #     lhs = NULL,
   #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
@@ -416,7 +416,7 @@ specials_bsts <- new_specials(
 #' }
 #'
 #' @export
-BSTS <- function(formula, ...){
+BSTS <- function(formula, ...) {
   bsts_model <- new_model_class("bsts", train_bsts, specials_bsts)
   new_model_definition(bsts_model, !!enquo(formula), ...)
 }
@@ -448,7 +448,7 @@ BSTS <- function(formula, ...){
 #' }
 #'
 #' @export
-forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 1000, ...){
+forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 1000, ...) {
   mdl <- object$model
 
   # new_data will include a tsibble with the dates for prediction
@@ -480,14 +480,14 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 10
 
 #' Extract fitted values
 #'
-#' Extracts the fitted values from an estimated Prophet model.
+#' Extracts the fitted values from an estimated bsts model.
 #'
 #' @inheritParams fable::fitted.ARIMA
 #'
 #' @return A vector of fitted values.
 #'
 #' @export
-fitted.fbl_prophet <- function(object, ...){
+fitted.fbl_bsts <- function(object, ...) {
   object$est[[".fitted"]]
 }
 
@@ -502,7 +502,7 @@ fitted.fbl_prophet <- function(object, ...){
 #' @return A vector of residuals.
 #'
 #' @export
-residuals.fbl_bsts <- function(object, ...){
+residuals.fbl_bsts <- function(object, ...) {
   object$est[[".resid"]]
 }
 
@@ -544,16 +544,16 @@ residuals.fbl_bsts <- function(object, ...){
 #' }
 #'
 #' @export
-components.fbl_bsts <- function(object, ...){
-  cmp <- object$components
-  cmp$.resid <- object$est$.resid
-  mv <- measured_vars(cmp)
-  as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
-           aliases = set_names(
-             list(expr(!!sym("trend") * (1 + !!sym("multiplicative_terms")) + !!sym("additive_terms") + !!sym(".resid"))),
-             mv[1]
-           )
-  )
+components.fbl_bsts <- function(object, ...) {
+  # cmp <- object$components
+  # cmp$.resid <- object$est$.resid
+  # mv <- measured_vars(cmp)
+  # as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
+  #          aliases = set_names(
+  #            list(expr(!!sym("trend") * (1 + !!sym("multiplicative_terms")) + !!sym("additive_terms") + !!sym(".resid"))),
+  #            mv[1]
+  #          )
+  # )
 }
 
 # GLANCE MODEL =====================================================================================
@@ -582,11 +582,11 @@ components.fbl_bsts <- function(object, ...){
 #'
 #' @export
 glance.fbl_bsts <- function(x, ...){
-  changepoints <- tibble(
-    changepoints = x$model$changepoints,
-    adjustment = as.numeric(x$model$params$delta)
-  )
-  tibble(sigma = stats::sd(x$est$.resid, na.rm = TRUE), changepoints = list(changepoints))
+  # changepoints <- tibble(
+  #   changepoints = x$model$changepoints,
+  #   adjustment = as.numeric(x$model$params$delta)
+  # )
+  # tibble(sigma = stats::sd(x$est$.resid, na.rm = TRUE), changepoints = list(changepoints))
 }
 
 # EXTRACT COEFFICIENTS =============================================================================
@@ -612,35 +612,35 @@ glance.fbl_bsts <- function(x, ...){
 #'
 #' @export
 tidy.fbl_bsts <- function(x, ...){
-  growth_terms <- c("base_growth", "trend_offset")
-
-  seas_terms <- map2(
-    x$model$seasonalities, names(x$model$seasonalities),
-    function(seas, nm){
-      k <- seas[["fourier.order"]]
-      paste0(nm, rep(c("_s", "_c"), k), rep(seq_len(k), each = 2))
-    }
-  )
-
-  hol_terms <- if (is.null(x$model$holidays)) {
-    NULL
-    } else {
-      map2(
-        x$model$holidays$holiday,
-        map2(x$model$holidays[["lower_window"]]%||%0, x$model$holidays[["upper_window"]]%||%0, seq),
-        function(nm, window){
-          window <- ifelse(sign(window) == 1, paste0("_+", window), ifelse(sign(window) == -1, paste0("_", window), ""))
-          paste0(nm, window)
-        }
-      )
-    }
-
-  xreg_terms <- names(x$model$extra_regressors)
-
-  tibble(
-    term = invoke(c, c(growth_terms, seas_terms, hol_terms, xreg_terms)),
-    estimate = c(x$model$params$k, x$model$params$m, x$model$params$beta)
-  )
+  # growth_terms <- c("base_growth", "trend_offset")
+  #
+  # seas_terms <- map2(
+  #   x$model$seasonalities, names(x$model$seasonalities),
+  #   function(seas, nm){
+  #     k <- seas[["fourier.order"]]
+  #     paste0(nm, rep(c("_s", "_c"), k), rep(seq_len(k), each = 2))
+  #   }
+  # )
+  #
+  # hol_terms <- if (is.null(x$model$holidays)) {
+  #   NULL
+  #   } else {
+  #     map2(
+  #       x$model$holidays$holiday,
+  #       map2(x$model$holidays[["lower_window"]]%||%0, x$model$holidays[["upper_window"]]%||%0, seq),
+  #       function(nm, window){
+  #         window <- ifelse(sign(window) == 1, paste0("_+", window), ifelse(sign(window) == -1, paste0("_", window), ""))
+  #         paste0(nm, window)
+  #       }
+  #     )
+  #   }
+  #
+  # xreg_terms <- names(x$model$extra_regressors)
+  #
+  # tibble(
+  #   term = invoke(c, c(growth_terms, seas_terms, hol_terms, xreg_terms)),
+  #   estimate = c(x$model$params$k, x$model$params$m, x$model$params$beta)
+  # )
 }
 
 #' @export
