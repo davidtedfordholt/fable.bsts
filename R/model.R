@@ -4,6 +4,68 @@
 
 globalVariables("self")
 
+# SPECIALS =========================================================================================
+
+specials_bsts <- new_specials(
+  intercept = function() {
+    as.list(environment())
+  }
+  ,ar = function(type = c("auto", "specified"), lags = 1) {
+    type <- match.arg(type)
+    as.list(environment())
+  }
+  ,level = function(type = c("local", "shared")) {
+    type <- match.arg(type)
+    as.list(environment())
+  }
+  ,trend = function(type = c("local", "semilocal", "studentlocal")) {
+    type <- match.arg(type)
+    as.list(environment())
+  }
+  ,season = function(period = NULL, type = c("regression", "trig", "monthlyannual")) {
+    type <- match.arg(type)
+
+    # Extract data interval
+    interval <- tsibble::interval(self$data)
+    interval <- with(interval, lubridate::years(year) +
+                       lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
+                       lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
+                       lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
+                       lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
+
+    # if(rlang::is_missing(name) & is.character(period)){
+    #   name <- period
+    # }
+
+    # Compute bsts interval
+    period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
+    period <- period * suppressMessages(interval/lubridate::days(1))
+
+    # if(rlang::is_missing(name) && is.null(name)){
+    #   name <- paste0("season", period)
+    # }
+
+    as.list(environment())
+  }
+  # ,holiday = function(type = c("regression", "randomwalk", "hierarchical"),
+  #                    holiday_tbl = NULL, holiday_names = NULL) {
+  #   type <- match.arg(type)
+  #   as.list(environment())
+  # }
+  # ,xreg = function(..., lags = 1, standardize = "auto", type = NULL) {
+  #   model_formula <- new_formula(
+  #     lhs = NULL,
+  #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
+  #   )
+  #   list(
+  #     xreg = model.matrix(model_formula, self$data),
+  #     prior_scale = prior_scale,
+  #     standardize = standardize,
+  #     mode = type
+  #   )
+  # }
+)
+
 # TRAIN MODEL ======================================================================================
 
 #' @importFrom stats predict
