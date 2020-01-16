@@ -104,133 +104,128 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # AR and AUTOAR ----------------------------------------------------------------------------------
 
-  # if ("ar" %in% names(specials)) {
-  #
-  #   # check intercept validity
-  #   if (length(specials$ar) > 1) {
-  #     abort("BSTS only supports a single AR argument")
-  #   }
-  #
-  #   ar <- specials$ar[[1]]
-  #
-  #   if (!"lags" %in% names(trend)) {
-  #     state <- AddAutoAr(
-  #       state.specification = state,
-  #       y = vec_data
-  #     )
-  #   } else if (trend$type == "ar") {
-  #     state <- AddAr(
-  #       state.specification = state,
-  #       y = vec_data,
-  #       lags = trend$lags
-  #     )
-  #   }
-  # }
+  if ("ar" %in% names(specials)) {
+
+    # check intercept validity
+    if (length(specials$ar) > 1) {
+      abort("BSTS only supports a single AR argument")
+    }
+
+    ar <- specials$ar[[1]]
+
+    if (ar$type == "auto") {
+      state <- bsts::AddAutoAr(
+        state.specification = state,
+        y = vec_data,
+        lags = ar$lags
+      )
+    } else if (ar$type == "specified") {
+      state <- bsts::AddAr(
+        state.specification = state,
+        y = vec_data,
+        lags = ar$lags
+      )
+    }
+  }
 
   # LEVEL ------------------------------------------------------------------------------------------
 
-  # if ("level" %in% names(specials)) {
-  #   # check for level validity
-  #   if (length(specials$level) > 1) {
-  #     abort("BSTS only supports a single level argument")
-  #   }
-  #
-  #   level <- specials$level[[1]]
-  #
-  #   if (level$type == "locallevel") {
-  #     state <- AddLocalLevel(
-  #       state.specification = state,
-  #       y = vec_data
-  #     )
-  #   } else if (level$type == "sharedlevel") {
-  #     state <- AddSharedLocalLevel(
-  #       state.specification = state,
-  #       y = vec_data
-  #     )
-  #   }
-  # }
+  if ("level" %in% names(specials)) {
+    # check for level validity
+    if (length(specials$level) > 1) {
+      abort("BSTS only supports a single level argument")
+    }
+
+    level <- specials$level[[1]]
+
+    if (level$type == "local") {
+      state <- bsts::AddLocalLevel(
+        state.specification = state,
+        y = vec_data
+      )
+    } else if (level$type == "shared") {
+      state <- bsts::AddSharedLocalLevel(
+        state.specification = state,
+        y = vec_data
+      )
+    }
+  }
 
   # TREND ------------------------------------------------------------------------------------------
 
-  # if ("trend" %in% names(specials)) {
-  #   # check for trend validity
-  #   if (length(specials$trend) > 1) {
-  #     abort("BSTS only supports a single trend argument")
-  #   }
-  #
-  #   trend <- specials$trend[[1]]
-  #
-  #   if (trend$type == "local") {
-  #     state <- AddLocalLinearTrend(
-  #       state.specification = state,
-  #       y = vec_data
-  #     )
-  #   } else if (trend$type == "semilocal") {
-  #     state <- AddSemilocalLinearTrend(
-  #       state.specification = state,
-  #       y = vec_data
-  #     )
-  #   } else if (trend$type == "studentlocal") {
-  #     state <- AddStudentLocalLinearTrend(
-  #       state.specification = state,
-  #       y = vec_data,
-  #       save.weights = FALSE
-  #     )
-  #   }
-  # }
+  if ("trend" %in% names(specials)) {
+    # check for trend validity
+    if (length(specials$trend) > 1) {
+      abort("BSTS only supports a single trend argument")
+    }
+
+    trend <- specials$trend[[1]]
+
+    if (trend$type == "local") {
+      state <- bsts::AddLocalLinearTrend(
+        state.specification = state,
+        y = vec_data
+      )
+    } else if (trend$type == "semilocal") {
+      state <- bsts::AddSemilocalLinearTrend(
+        state.specification = state,
+        y = vec_data
+      )
+    } else if (trend$type == "studentlocal") {
+      state <- bsts::AddStudentLocalLinearTrend(
+        state.specification = state,
+        y = vec_data,
+        save.weights = FALSE
+      )
+    }
+  }
 
   # SEASONALITY ------------------------------------------------------------------------------------
 
-  # if ("season" %in% names(specials)) {
-  #   # Compute number of seasons
-  #   periods <- common_periods(self$data)
-  #   nseasons <- get_frequencies(period, self$data, .auto = "smallest")
-  #   if (nseasons %in% periods) {
-  #     name <- names(periods)[which(periods == nseasons)]
-  #   } else {
-  #     name <- paste0("season_", nseasons)
-  #   }
-  #
-  #   for (season in specials$season) {
-  #     # Regression Seasonality
-  #
-  #     if (season$type == "regression") {
-  #       # check validity
-  #       if (!"period" %in% names(season)) {
-  #         abort("period must be defined for regression seasonality.")
-  #       }
-  #
-  #       state <- AddSeasonal(
-  #         state.specification = state,
-  #         y = vec_data,
-  #         nseasons = season$nseasons
-  #       )
-  #
-  #     # Trigonometric Seasonality
-  #
-  #     } else if (season$type == "trig") {
-  #       # check validity
-  #       if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
-  #         abort("period and frequencies must be defined for trig seasonality.")
-  #       }
-  #       if (!season$period > 0 || any(!frequencies > 0)) {
-  #         abort("period and frequencies must be positive for trig seasonality.")
-  #       }
-  #
-  #       state <- AddTrig(
-  #         state.specification = state,
-  #         y = vec_data,
-  #         period = season$period,
-  #         frequencies = season$frequencies
-  #       )
-  #
-  #     # Monthly Annual Cyclicality
-  #
-  #     } else if (season$type == "monthlyannual") {
-  #       state <- AddMonthlyAnnualCycle(state)
-  #     }
-  #   }
-  # }
+  if ("season" %in% names(specials)) {
+
+    for (season in specials$season) {
+      # Regression Seasonality
+
+      if (season$type == "regression") {
+
+
+        # check validity
+        if (!"period" %in% names(season)) {
+          abort("period must be defined for regression seasonality.")
+        }
+
+        state <- bsts::AddSeasonal(
+          state.specification = state,
+          y = vec_data,
+          nseasons = season$period
+        )
+
+      # Trigonometric Seasonality
+
+      } else if (season$type == "trig") {
+        # check validity
+        if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
+          abort("period and frequencies must be defined for trig seasonality.")
+        }
+        if (!season$period > 0 || any(!frequencies > 0)) {
+          abort("period and frequencies must be positive for trig seasonality.")
+        }
+
+        state <- bsts::AddTrig(
+          state.specification = state,
+          y = vec_data,
+          period = season$period,
+          frequencies = season$frequencies
+        )
+
+      # Monthly Annual Cyclicality
+
+      } else if (season$type == "monthlyannual") {
+        state <- bsts::AddMonthlyAnnualCycle(state)
+      }
+    }
+  }
 
 
   # HOLIDAYS ---------------------------------------------------------------------------------------
