@@ -482,8 +482,7 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = NU
 
   # Compute predictions without intervals
   pred <- predict(mdl, niter = iterations, horizon = nrow(new_data))
-
-  sim <- list(pred$distribution)
+  sim <- split(pred$distribution, col(pred$distribution))
 
   # Return forecasts
   construct_fc(
