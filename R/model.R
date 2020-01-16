@@ -35,7 +35,7 @@ train_bsts <- function(.data, specials, ...) {
 
     intercept <- specials$intercept[[1]]
 
-    state <- AddStaticIntercept(
+    state <- bsts::AddStaticIntercept(
       state.specification = state,
       y = vec_data
     )
