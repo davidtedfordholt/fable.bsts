@@ -305,9 +305,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
       model = mdl
       ,est = list(
         .fitted = vec_data - colMeans(mdl$one.step.prediction.errors),
-        .resid = colMeans(mdl$one.step.prediction.errors)
-      )
-      ,components = cbind.data.frame(.data, t(colMeans(mdl$state.contributions)))
+        .resid = colMeans(mdl$one.step.prediction.errors))
+      ,components = tsibble::as_tsibble(
+        cbind.data.frame(.data, t(colMeans(mdl$state.contributions))))
+      ,iterations = iterations
       ),
     class = "fbl_bsts")
 }
