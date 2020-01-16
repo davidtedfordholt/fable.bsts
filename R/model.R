@@ -561,15 +561,14 @@ residuals.fbl_bsts <- function(object, ...) {
 #'
 #' @export
 components.fbl_bsts <- function(object, ...) {
-  # cmp <- object$components
-  # cmp$.resid <- object$est$.resid
-  # mv <- measured_vars(cmp)
-  # as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
-  #          aliases = set_names(
-  #            list(expr(!!sym("trend") * (1 + !!sym("multiplicative_terms")) + !!sym("additive_terms") + !!sym(".resid"))),
-  #            mv[1]
-  #          )
-  # )
+  cmp$.resid <- object$est$.resid
+  mv <- measured_vars(cmp)
+  as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
+           aliases = set_names(
+             list(expr(!!sym("trend") + !!sym("additive_terms") + !!sym(".resid"))),
+             mv[1]
+           )
+  )
 }
 
 # GLANCE MODEL =====================================================================================
