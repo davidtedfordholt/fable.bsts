@@ -273,8 +273,8 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   #       abort("The number of observations in ")
   #     }
   #
-  #   for(regressor in specials$xreg) {
-  #     for(nm in colnames(regressor$xreg)) {
+  #   for (regressor in specials$xreg) {
+  #     for (nm in colnames(regressor$xreg)) {
   #       model_data[nm] <- regressor$xreg[,nm]
   #
   #       if (nrow(xreg_data) != length(vec_data)) {
