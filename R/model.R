@@ -474,8 +474,8 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = NU
   # Prepare data
   # new_data <- rename(as.data.frame(new_data), ds = !!index(new_data))
   # ## Exogenous Regressors
-  # for(regressor in specials$xreg){
-  #   for(nm in colnames(regressor$xreg)){
+  # for (regressor in specials$xreg) {
+  #   for (nm in colnames(regressor$xreg)) {
   #     new_data[nm] <- regressor$xreg[,nm]
   #   }
   # }
