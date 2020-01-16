@@ -69,7 +69,7 @@ specials_bsts <- new_specials(
 # TRAIN MODEL ======================================================================================
 
 #' @importFrom stats predict
-train_bsts <- function(.data, specials, ...) {
+train_bsts <- function(.data, specials, iterations = 1000, ...) {
   if (length(tsibble::measured_vars(.data)) > 1) {
     abort("Only univariate responses are supported by bsts")
   }
