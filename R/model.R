@@ -659,6 +659,8 @@ components.fbl_bsts <- function(object, ...) {
 #   )
 # }
 
+# IDENTITY =========================================================================================
+
 #' @export
 model_sum.fbl_bsts <- function(x){
   "bsts"
