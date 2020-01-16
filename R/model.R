@@ -487,7 +487,7 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = NU
   # Return forecasts
   construct_fc(
     point = pred$mean,
-    sd = apply(pred$distribution, 2, stats::sd),
+    sd = unname(map_dbl(sim, stats::sd)),
     dist = dist_sim(sim)
   )
 }
