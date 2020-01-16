@@ -75,8 +75,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   }
 
   # Prepare data for modelling
-  model_data <- as_tibble(.data)[c(expr_text(index(.data)), measured_vars(.data))]
-  vec_data <- model_data %>% pull(measured_vars(.data))
+  vec_data <- dplyr::pull(.data[tsibble::measured_vars(.data)], 1)
 
   # Initialize state specification
   state <- list()
