@@ -627,37 +627,37 @@ components.fbl_bsts <- function(object, ...) {
 #' }
 #'
 #' @export
-tidy.fbl_bsts <- function(x, ...){
-  # growth_terms <- c("base_growth", "trend_offset")
-  #
-  # seas_terms <- map2(
-  #   x$model$seasonalities, names(x$model$seasonalities),
-  #   function(seas, nm){
-  #     k <- seas[["fourier.order"]]
-  #     paste0(nm, rep(c("_s", "_c"), k), rep(seq_len(k), each = 2))
-  #   }
-  # )
-  #
-  # hol_terms <- if (is.null(x$model$holidays)) {
-  #   NULL
-  #   } else {
-  #     map2(
-  #       x$model$holidays$holiday,
-  #       map2(x$model$holidays[["lower_window"]]%||%0, x$model$holidays[["upper_window"]]%||%0, seq),
-  #       function(nm, window){
-  #         window <- ifelse(sign(window) == 1, paste0("_+", window), ifelse(sign(window) == -1, paste0("_", window), ""))
-  #         paste0(nm, window)
-  #       }
-  #     )
-  #   }
-  #
-  # xreg_terms <- names(x$model$extra_regressors)
-  #
-  # tibble(
-  #   term = invoke(c, c(growth_terms, seas_terms, hol_terms, xreg_terms)),
-  #   estimate = c(x$model$params$k, x$model$params$m, x$model$params$beta)
-  # )
-}
+# tidy.fbl_bsts <- function(x, ...){
+#   growth_terms <- c("base_growth", "trend_offset")
+#
+#   seas_terms <- map2(
+#     x$model$seasonalities, names(x$model$seasonalities),
+#     function(seas, nm){
+#       k <- seas[["fourier.order"]]
+#       paste0(nm, rep(c("_s", "_c"), k), rep(seq_len(k), each = 2))
+#     }
+#   )
+#
+#   hol_terms <- if (is.null(x$model$holidays)) {
+#     NULL
+#     } else {
+#       map2(
+#         x$model$holidays$holiday,
+#         map2(x$model$holidays[["lower_window"]]%||%0, x$model$holidays[["upper_window"]]%||%0, seq),
+#         function(nm, window){
+#           window <- ifelse(sign(window) == 1, paste0("_+", window), ifelse(sign(window) == -1, paste0("_", window), ""))
+#           paste0(nm, window)
+#         }
+#       )
+#     }
+#
+#   xreg_terms <- names(x$model$extra_regressors)
+#
+#   tibble(
+#     term = invoke(c, c(growth_terms, seas_terms, hol_terms, xreg_terms)),
+#     estimate = c(x$model$params$k, x$model$params$m, x$model$params$beta)
+#   )
+# }
 
 #' @export
 model_sum.fbl_bsts <- function(x){
