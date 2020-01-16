@@ -464,7 +464,7 @@ BSTS <- function(formula, ...) {
 #' }
 #'
 #' @export
-forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = 1000, ...) {
+forecast.fbl_bsts <- function(object, new_data, specials = NULL,...) {
   mdl <- object$model
 
   # new_data will include a tsibble with the dates for prediction
