@@ -313,47 +313,6 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     class = "fbl_bsts")
 }
 
-# SPECIALS =========================================================================================
-
-specials_bsts <- new_specials(
-  intercept = function() {
-    as.list(environment())
-  }
-  # ,ar = function(lags = NULL) {
-  #   type <- match.arg(type)
-  #   as.list(environment())
-  # }
-  # ,level = function(type = c("local", "shared")) {
-  #   type <- match.arg(type)
-  #   as.list(environment())
-  # }
-  # ,trend = function(type = c("local", "semilocal", "studentlocal")) {
-  #   type <- match.arg(type)
-  #   as.list(environment())
-  # }
-  # ,season = function(type = c("regression", "trig", "monthlyannual"), period = NULL) {
-  #   type <- match.arg(type)
-  #   as.list(environment())
-  # }
-  # ,holiday = function(type = c("regression", "randomwalk", "hierarchical"),
-  #                    holiday_tbl = NULL, holiday_names = NULL) {
-  #   type <- match.arg(type)
-  #   as.list(environment())
-  # }
-  # ,xreg = function(..., lags = 1, standardize = "auto", type = NULL) {
-  #   model_formula <- new_formula(
-  #     lhs = NULL,
-  #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
-  #   )
-  #   list(
-  #     xreg = model.matrix(model_formula, self$data),
-  #     prior_scale = prior_scale,
-  #     standardize = standardize,
-  #     mode = type
-  #   )
-  # }
-)
-
 # DOCUMENTATION ====================================================================================
 
 #' bsts procedure modelling
