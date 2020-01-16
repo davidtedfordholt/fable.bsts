@@ -597,13 +597,13 @@ components.fbl_bsts <- function(object, ...) {
 #' }
 #'
 #' @export
-glance.fbl_bsts <- function(x, ...){
-  # changepoints <- tibble(
-  #   changepoints = x$model$changepoints,
-  #   adjustment = as.numeric(x$model$params$delta)
-  # )
-  # tibble(sigma = stats::sd(x$est$.resid, na.rm = TRUE), changepoints = list(changepoints))
-}
+# glance.fbl_bsts <- function(x, ...){
+#   changepoints <- tibble(
+#     changepoints = x$model$changepoints,
+#     adjustment = as.numeric(x$model$params$delta)
+#   )
+#   tibble(sigma = stats::sd(x$est$.resid, na.rm = TRUE), changepoints = list(changepoints))
+# }
 
 # EXTRACT COEFFICIENTS =============================================================================
 
