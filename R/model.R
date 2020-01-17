@@ -190,6 +190,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   if ("season" %in% names(specials)) {
 
     # check seasonal validity
+    # NOT well-implemented, but I'm not sure how specials$season is structured
     if (length(specials$season) > 1) {
       periods <- c()
       for (season in specials$season) {
