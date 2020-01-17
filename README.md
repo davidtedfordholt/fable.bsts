@@ -3,13 +3,9 @@
 
 # fable.bsts (under construction)
 
-[![Travis build
-status](https://travis-ci.org/mitchelloharawild/fable.prophet.svg?branch=master)](https://travis-ci.org/mitchelloharawild/fable.prophet)
-[![Codecov test
-coverage](https://codecov.io/gh/mitchelloharawild/fable.prophet/branch/master/graph/badge.svg)](https://codecov.io/gh/mitchelloharawild/fable.prophet?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
-This package provides a tidy R interface to the prophet forecasting
+This package provides a tidy R interface to the bsts forecasting
 procedure using [fable](https://github.com/tidyverts/fable). This
 package makes use of the [bsts
 package](https://cran.r-project.org/package=bsts) for R.
@@ -43,8 +39,7 @@ cafe <- tsibbledata::aus_retail %>%
 Each series generally exhibits an increasing trend with an annual
 seasonal pattern that varies proportionally to the level of the series.
 At a monthly level, any holiday effects can be modelled using a seasonal
-term. A piecewise linear trend is included by default, and so it is not
-included in the model specification below.
+term. A piecewise linear trend is included, as well.
 
 ``` r
 library(fable.bsts)
@@ -52,7 +47,7 @@ library(fable.bsts)
 #> Loading required package: fabletools
 fit <- cafe %>% 
   model(
-    bsts = BSTS(Turnover ~ season("year"))
+    bsts = BSTS(Turnover ~ season("year") + trend())
   )
 ```
 
