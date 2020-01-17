@@ -189,6 +189,17 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   if ("season" %in% names(specials)) {
 
+    # check seasonal validity
+    if (length(specials$season) > 1) {
+      periods <- c()
+      for (season in specials$season) {
+        periods <- c(periods, season$period)
+      }
+      if (any(duplicated(periods))) {
+        abort("No more than one seasonal model can be specified for a single period.")
+      }
+    }
+
     for (season in specials$season) {
       # Regression Seasonality
 
