@@ -218,28 +218,28 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
           nseasons = season$period
         )
 
-      # Trigonometric Seasonality
-
-      } else if (season$type == "trig") {
-        # check validity
-        if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
-          abort("period and frequencies must be defined for trig seasonality.")
-        }
-        if (!season$period > 0 || any(!frequencies > 0)) {
-          abort("period and frequencies must be positive for trig seasonality.")
-        }
-
-        state <- bsts::AddTrig(
-          state.specification = state,
-          y = vec_data,
-          period = season$period,
-          frequencies = season$frequencies
-        )
-
-      # Monthly Annual Cyclicality
-
-      } else if (season$type == "monthlyannual") {
-        state <- bsts::AddMonthlyAnnualCycle(state)
+      # # Trigonometric Seasonality
+      #
+      # } else if (season$type == "trig") {
+      #   # check validity
+      #   if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
+      #     abort("period and frequencies must be defined for trig seasonality.")
+      #   }
+      #   if (!season$period > 0 || any(!frequencies > 0)) {
+      #     abort("period and frequencies must be positive for trig seasonality.")
+      #   }
+      #
+      #   state <- bsts::AddTrig(
+      #     state.specification = state,
+      #     y = vec_data,
+      #     period = season$period,
+      #     frequencies = season$frequencies
+      #   )
+      #
+      # # Monthly Annual Cyclicality
+      #
+      # } else if (season$type == "monthlyannual") {
+      #   state <- bsts::AddMonthlyAnnualCycle(state)
       }
     }
   }
