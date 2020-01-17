@@ -34,8 +34,6 @@ cafe <- tsibbledata::aus_retail %>%
   filter(Industry == "Cafes, restaurants and catering services")
 ```
 
-<img src="man/figures/README-plot-1.png" width="100%" />
-
 Each series generally exhibits an increasing trend with an annual
 seasonal pattern that varies proportionally to the level of the series.
 At a monthly level, any holiday effects can be modelled using a seasonal
@@ -74,8 +72,6 @@ each of the time series. Components from this model can be extracted:
 components(fit)
 ```
 
-<img src="man/figures/README-components-plot-1.png" width="100%" /><img src="man/figures/README-components-plot-2.png" width="100%" />
-
 Note that the annual seasonal pattern does not change very quickly,
 although it does differ slightly between years. A very differently
 seasonal pattern can be seen for the Northern Territory. We can also
@@ -85,5 +81,3 @@ produce forecasts for each of these series over the next two years.
 fc <- fit %>% 
   forecast(h = 24)
 ```
-
-<img src="man/figures/README-fable-1.png" width="100%" />
