@@ -86,7 +86,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check intercept validity
     if (length(specials$intercept) > 1) {
-      abort("BSTS only supports a single intercept argument")
+      abort("The state should include at most one stationary component.")
     }
     if ("level" %in% names(specials) || "trend" %in% names(specials)) {
       abort("If the model includes a traditional trend component (e.g. local level, local linear
@@ -106,9 +106,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   if ("ar" %in% names(specials)) {
 
-    # check intercept validity
-    if (length(specials$ar) > 1) {
-      abort("BSTS only supports a single AR argument")
+    # check AR validity
+    if (length(specials$ar) > 1 || "level" %in% names(specials) || "trend" %in% names(specials)) {
+      abort("The state should include at most one non-stationary trend component, include trends,
+            levels, or autoregressive models.")
     }
 
     ar <- specials$ar[[1]]
@@ -131,9 +132,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   # LEVEL ------------------------------------------------------------------------------------------
 
   if ("level" %in% names(specials)) {
-    # check for level validity
-    if (length(specials$level) > 1) {
-      abort("BSTS only supports a single level argument")
+
+    # check level validity
+    if (length(specials$level) > 1 || "trend" %in% names(specials)) {
+      abort("The state should include at most one non-stationary trend component, include trends,
+            levels, or autoregressive models.")
     }
 
     level <- specials$level[[1]]
@@ -154,9 +157,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   # TREND ------------------------------------------------------------------------------------------
 
   if ("trend" %in% names(specials)) {
+
     # check for trend validity
     if (length(specials$trend) > 1) {
-      abort("BSTS only supports a single trend argument")
+      abort("The state should include at most one non-stationary trend component, include trends,
+            levels, or autoregressive models.")
     }
 
     trend <- specials$trend[[1]]
