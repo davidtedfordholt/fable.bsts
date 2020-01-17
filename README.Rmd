@@ -13,83 +13,23 @@ knitr::opts_chunk$set(
 )
 ```
 # fable.bsts
-[![Travis build status](https://travis-ci.org/davidtedfordholt/fable.bsts?branch=master)](https://travis-ci.org/davidtedfordholt/fable.bsts)
-[![Codecov test coverage](https://codecov.io/gh/davidtedfordholt/fable.bsts/branch/master/graph/badge.svg)](https://codecov.io/gh/davidtedfordholt/fable.bsts?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
-This package provides a tidy R interface to the prophet forecasting procedure using [fable](https://github.com/tidyverts/fable). This package makes use of the [prophet package](https://cran.r-project.org/package=bsts) for R.
+This package provides a tidy R interface to the bsts forecasting procedure using [fable](https://github.com/tidyverts/fable). This package makes use of the [prophet package](https://cran.r-project.org/package=bsts) for R.
 
-## Installation
+## Completed
 
-You can install the development version of fable.bsts from [Github](https://github.com/davidtedfordholt/bsts) with:
+- Static Intercepts ^1^
+- Levels (local and shared) ^1^
+- Auto-regressive models (auto and user-specified) ^1^
+- Trends (local linear, semilocal linear and Student local linear) ^1^
+- Regression and Trigonometric seasonality specification ^1^
+^1^ _user specification of priors is not yet implemented._
 
-``` r
-# install.packages("remotes")
-remotes::install_github("davidtedfordholt/fable.bsts")
-```
+## In Progress
 
-## Example
-
-Suppose we wanted to model Australia's monthly turnover for cafes, restaurants and catering services. The data is available from the Australian Bureau of Statistics catalogue 8501.0, and in the [tsibbledata](https://github.com/tidyverts/tsibbledata) package.
-
-```{r data, message=FALSE}
-library(tsibble)
-library(dplyr)
-cafe <- tsibbledata::aus_retail %>% 
-  filter(Industry == "Cafes, restaurants and catering services")
-```
-```{r plot, echo = FALSE}
-library(ggplot2)
-cafe %>% 
-  ggplot(aes(x = Month, y = Turnover, colour = State)) + 
-  geom_line() + 
-  ylab("Turnover (millions $AUD)")
-```
-
-Each series generally exhibits an increasing trend with an annual seasonal pattern that varies proportionally to the level of the series. At a monthly level, any holiday effects can be modelled using a seasonal term. A piecewise linear trend is included by default, and so it is not included in the model specification below.
-
-```{r model}
-library(fable.bsts)
-fit <- cafe %>% 
-  model(
-    prophet = prophet(Turnover ~ season("year", 4, type = "multiplicative"))
-  )
-```
-
-```{r mable}
-fit
-```
-
-The above output confirms that this Prophet model has been fitted to each of the time series. Components from this model can be extracted:
-
-```{r components}
-components(fit)
-```
-```{r components-plot, echo = FALSE, message = FALSE}
-library(lubridate)
-components(fit) %>%
-  ggplot(aes(x = Month, y = trend, colour = State)) + 
-  geom_line()
-components(fit) %>%
-  ggplot(aes(x = month(Month), y = year, 
-             colour = State, group = interaction(year(Month), State))) + 
-  geom_line() + 
-  scale_x_continuous(breaks = 1:12, labels = month.abb) + 
-  xlab("Month")
-```
-
-Note that the annual seasonal pattern does not change very quickly, although it does differ slightly between years. A very differently seasonal pattern can be seen for the Northern Territory. We can also produce forecasts for each of these series over the next two years.
-
-```{r forecast}
-fc <- fit %>% 
-  forecast(h = 24)
-```
-
-```{r fable, echo = FALSE}
-fc
-cafe %>% 
-  ggplot(aes(x = Month, y = Turnover, colour = State)) + 
-  geom_line() + 
-  autolayer(fc)
-```
+- Holiday specification
+- Exogenous Regressor specification
+- Monthly-Annual cyclicality for daily data
+- User-defined priors
 
