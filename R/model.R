@@ -22,9 +22,7 @@ specials_bsts <- new_specials(
     type <- match.arg(type)
     as.list(environment())
   }
-  ,season = function(period = NULL, type = c("regression", "trig", "monthlyannual")) {
-    type <- match.arg(type)
-
+  ,seasonal = function(period = NULL) {
     # Extract data interval
     interval <- tsibble::interval(self$data)
     interval <- with(interval, lubridate::years(year) +
@@ -33,17 +31,31 @@ specials_bsts <- new_specials(
                        lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
                        lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
 
-    # if(rlang::is_missing(name) & is.character(period)){
-    #   name <- period
-    # }
+    # Compute bsts interval
+    period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
+    period <- period * suppressMessages(interval/lubridate::days(1))
+
+    as.list(environment())
+  }
+  ,trig = function(period = NULL, frequencies = 1) {
+    # Extract data interval
+    interval <- tsibble::interval(self$data)
+    interval <- with(interval, lubridate::years(year) +
+                       lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
+                       lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
+                       lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
+                       lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
 
     # Compute bsts interval
     period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
     period <- period * suppressMessages(interval/lubridate::days(1))
 
-    # if(rlang::is_missing(name) && is.null(name)){
-    #   name <- paste0("season", period)
-    # }
+    as.list(environment())
+  }
+  ,cycle = function() {
+    if (frequency(self$data) != 7) {
+      abort("Monthly-annual cycle can only be used with daily data.")
+    }
 
     as.list(environment())
   }
@@ -71,7 +83,7 @@ specials_bsts <- new_specials(
 #' @importFrom stats predict
 train_bsts <- function(.data, specials, iterations = 1000, ...) {
   if (length(tsibble::measured_vars(.data)) > 1) {
-    abort("Only univariate responses are supported by bsts")
+    rlang::abort("Only univariate responses are supported by bsts")
   }
 
   # Prepare data for modelling
@@ -86,10 +98,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check intercept validity
     if (length(specials$intercept) > 1) {
-      abort("The state should include at most one stationary component.")
+      rlang::abort("The state should include at most one stationary component.")
     }
     if ("level" %in% names(specials) || "trend" %in% names(specials)) {
-      abort("If the model includes a traditional trend component (e.g. local level, local linear
+      rlang::abort("If the model includes a traditional trend component (e.g. local level, local linear
             trend, etc) then a separate intercept is not needed (and will probably cause trouble,
             as it will be confounded with the initial state of the trend model).")
     }
@@ -108,7 +120,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check AR validity
     if (length(specials$ar) > 1 || "level" %in% names(specials) || "trend" %in% names(specials)) {
-      abort("The state should include at most one non-stationary trend component, include trends,
+      rlang::abort("The state should include at most one non-stationary trend component, include trends,
             levels, or autoregressive models.")
     }
 
@@ -160,7 +172,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check for trend validity
     if (length(specials$trend) > 1) {
-      abort("The state should include at most one non-stationary trend component, include trends,
+      rlang::abort("The state should include at most one non-stationary trend component, include trends,
             levels, or autoregressive models.")
     }
 
@@ -185,64 +197,65 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     }
   }
 
-  # SEASONALITY ------------------------------------------------------------------------------------
+  # SEASONAL ---------------------------------------------------------------------------------------
 
-  if ("season" %in% names(specials)) {
+  if ("seasonal" %in% names(specials)) {
 
-    # check seasonal validity
-    # NOT well-implemented, but I'm not sure how specials$season is structured
-    if (length(specials$season) > 1) {
-      periods <- c()
-      for (season in specials$season) {
-        periods <- c(periods, season$period)
-      }
-      if (any(duplicated(periods))) {
-        abort("No more than one seasonal model can be specified for a single period.")
-      }
-    }
+    # # check seasonal validity
+    # # NOT well-implemented, but I'm not sure how specials$season is structured
+    # if (length(specials$season) > 1) {
+    #   periods <- c()
+    #   for (season in specials$season) {
+    #     periods <- c(periods, season$period)
+    #   }
+    #   if (any(duplicated(periods))) {
+    #     rlang::abort("No more than one seasonal model can be specified for a single period.")
+    #   }
+    # }
 
-    for (season in specials$season) {
-      # Regression Seasonality
-
-      if (season$type == "regression") {
-
+    for (seasonal in specials$seasonal) {
 
         # check validity
-        if (!"period" %in% names(season)) {
-          abort("period must be defined for regression seasonality.")
+        if (!"period" %in% names(seasonal)) {
+          rlang::abort("period must be defined for regression seasonality.")
         }
 
         state <- bsts::AddSeasonal(
           state.specification = state,
           y = vec_data,
-          nseasons = season$period
+          nseasons = seasonal$period
         )
-
-      # # Trigonometric Seasonality
-      #
-      # } else if (season$type == "trig") {
-      #   # check validity
-      #   if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
-      #     abort("period and frequencies must be defined for trig seasonality.")
-      #   }
-      #   if (!season$period > 0 || any(!frequencies > 0)) {
-      #     abort("period and frequencies must be positive for trig seasonality.")
-      #   }
-      #
-      #   state <- bsts::AddTrig(
-      #     state.specification = state,
-      #     y = vec_data,
-      #     period = season$period,
-      #     frequencies = season$frequencies
-      #   )
-      #
-      # # Monthly Annual Cyclicality
-      #
-      # } else if (season$type == "monthlyannual") {
-      #   state <- bsts::AddMonthlyAnnualCycle(state)
-      }
     }
   }
+
+
+  # TRIG -------------------------------------------------------------------------------------------
+
+  if ("trig" %in% names(specials)) {
+
+    for (trig in specials$trig) {
+
+      # check trig validity
+      if (!"period" %in% names(trig) || !"frequencies" %in% names(trig)) {
+        rlang::abort("period and frequencies must be defined for trig seasonality.")
+      }
+      if (!trig$period > 0 || any(!trig$frequencies > 0)) {
+        rlang::abort("period and frequencies must be positive for trig seasonality.")
+      }
+
+      state <- bsts::AddTrig(
+        state.specification = state,
+        y = vec_data,
+        period = trig$period,
+        frequencies = trig$frequencies
+      )
+    }
+  }
+
+
+  # CYCLE ------------------------------------------------------------------------------------------
+
+
 
 
   # HOLIDAYS ---------------------------------------------------------------------------------------
@@ -392,19 +405,34 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #' }
 #' }
 #'
-#' \subsection{season}{
-#' The `season` special is used to specify a seasonal component.
+#' \subsection{seasonal}{
+#' The `seasonal` special is used to specify a seasonal component.
 #' This special can be used multiple times for different seasonalities.
 #'
 #' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
 #'
 #' \preformatted{
-#' season(type = c("regression", "trig", "monthlyannual"), period = NULL)
+#' seasonal(period = NULL)
 #' }
 #'
 #' \tabular{ll}{
-#'   `type`  \tab The type of seasonality (seasonal regression, trigonometric, or monthly-annual cycle).\cr
 #'   `period`   \tab The periodic nature of the seasonality. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
+#' }
+#' }
+#'
+#' \subsection{trig}{
+#' The `trig` special is used to specify a trigonometric seasonal component.
+#' This special can be used multiple times for different seasonalities.
+#'
+#' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
+#'
+#' \preformatted{
+#' trig(period = NULL, frequencies = 1)
+#' }
+#'
+#' \tabular{ll}{
+#'   `period`   \tab The length of the longest cycle. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
+#'   `frequencies`  \tab A vector of positive real numbers giving the number of times each cyclic component repeats in a period. One sine and one cosine term will be added for each frequency.\cr
 #' }
 #' }
 #'
@@ -481,10 +509,12 @@ BSTS <- function(formula, ...) {
 #' }
 #'
 #' @export
-forecast.fbl_bsts <- function(object, new_data, specials = NULL, iterations = NULL, ...) {
+forecast.fbl_bsts <- function(object, new_data, specials = NULL, ...) {
   mdl <- object$model
 
-  iterations <- ifelse(is_missing(iterations), mdl$iterations)
+  if (rlang::is_missing(iterations)) {
+    iterations <- mdl$iterations
+  }
 
   # new_data will include a tsibble with the dates for prediction
 
