@@ -229,30 +229,26 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   }
 
 
+  # TRIG -------------------------------------------------------------------------------------------
 
-      # # Trigonometric Seasonality
-      #
-      # } else if (season$type == "trig") {
-      #   # check validity
-      #   if (!"period" %in% names(season) || !"frequencies" %in% names(season)) {
-      #     abort("period and frequencies must be defined for trig seasonality.")
-      #   }
-      #   if (!season$period > 0 || any(!frequencies > 0)) {
-      #     abort("period and frequencies must be positive for trig seasonality.")
-      #   }
-      #
-      #   state <- bsts::AddTrig(
-      #     state.specification = state,
-      #     y = vec_data,
-      #     period = season$period,
-      #     frequencies = season$frequencies
-      #   )
-      #
-      # # Monthly Annual Cyclicality
-      #
-      # } else if (season$type == "monthlyannual") {
-      #   state <- bsts::AddMonthlyAnnualCycle(state)
+  if ("trig" %in% names(specials)) {
+
+    for (trig in specials$trig) {
+
+      # check trig validity
+      if (!"period" %in% names(trig) || !"frequencies" %in% names(trig)) {
+        rlang::abort("period and frequencies must be defined for trig seasonality.")
       }
+      if (!trig$period > 0 || any(!trig$frequencies > 0)) {
+        rlang::abort("period and frequencies must be positive for trig seasonality.")
+      }
+
+      state <- bsts::AddTrig(
+        state.specification = state,
+        y = vec_data,
+        period = trig$period,
+        frequencies = trig$frequencies
+      )
     }
   }
 
