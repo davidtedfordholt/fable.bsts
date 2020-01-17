@@ -22,9 +22,7 @@ specials_bsts <- new_specials(
     type <- match.arg(type)
     as.list(environment())
   }
-  ,season = function(period = NULL, type = c("regression", "trig", "monthlyannual")) {
-    type <- match.arg(type)
-
+  ,seasonal = function(period = NULL) {
     # Extract data interval
     interval <- tsibble::interval(self$data)
     interval <- with(interval, lubridate::years(year) +
@@ -33,17 +31,31 @@ specials_bsts <- new_specials(
                        lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
                        lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
 
-    # if(rlang::is_missing(name) & is.character(period)){
-    #   name <- period
-    # }
+    # Compute bsts interval
+    period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
+    period <- period * suppressMessages(interval/lubridate::days(1))
+
+    as.list(environment())
+  }
+  ,trig = function(period = NULL, frequencies = 1) {
+    # Extract data interval
+    interval <- tsibble::interval(self$data)
+    interval <- with(interval, lubridate::years(year) +
+                       lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
+                       lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
+                       lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
+                       lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
 
     # Compute bsts interval
     period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
     period <- period * suppressMessages(interval/lubridate::days(1))
 
-    # if(rlang::is_missing(name) && is.null(name)){
-    #   name <- paste0("season", period)
-    # }
+    as.list(environment())
+  }
+  ,cycle = function() {
+    if (frequency(self$data) != 7) {
+      abort("Monthly-annual cycle can only be used with daily data.")
+    }
 
     as.list(environment())
   }
