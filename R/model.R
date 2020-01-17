@@ -405,19 +405,34 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #' }
 #' }
 #'
-#' \subsection{season}{
-#' The `season` special is used to specify a seasonal component.
+#' \subsection{seasonal}{
+#' The `seasonal` special is used to specify a seasonal component.
 #' This special can be used multiple times for different seasonalities.
 #'
 #' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
 #'
 #' \preformatted{
-#' season(type = c("regression", "trig", "monthlyannual"), period = NULL)
+#' seasonal(period = NULL)
 #' }
 #'
 #' \tabular{ll}{
-#'   `type`  \tab The type of seasonality (seasonal regression, trigonometric, or monthly-annual cycle).\cr
 #'   `period`   \tab The periodic nature of the seasonality. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
+#' }
+#' }
+#'
+#' \subsection{trig}{
+#' The `trig` special is used to specify a trigonometric seasonal component.
+#' This special can be used multiple times for different seasonalities.
+#'
+#' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
+#'
+#' \preformatted{
+#' trig(period = NULL, frequencies = 1)
+#' }
+#'
+#' \tabular{ll}{
+#'   `period`   \tab The length of the longest cycle. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
+#'   `frequencies`  \tab A vector of positive real numbers giving the number of times each cyclic component repeats in a period. One sine and one cosine term will be added for each frequency.\cr
 #' }
 #' }
 #'
