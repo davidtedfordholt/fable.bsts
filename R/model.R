@@ -197,38 +197,38 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     }
   }
 
-  # SEASONALITY ------------------------------------------------------------------------------------
+  # SEASONAL ---------------------------------------------------------------------------------------
 
-  if ("season" %in% names(specials)) {
+  if ("seasonal" %in% names(specials)) {
 
-    # check seasonal validity
-    # NOT well-implemented, but I'm not sure how specials$season is structured
-    if (length(specials$season) > 1) {
-      periods <- c()
-      for (season in specials$season) {
-        periods <- c(periods, season$period)
-      }
-      if (any(duplicated(periods))) {
-        abort("No more than one seasonal model can be specified for a single period.")
-      }
-    }
+    # # check seasonal validity
+    # # NOT well-implemented, but I'm not sure how specials$season is structured
+    # if (length(specials$season) > 1) {
+    #   periods <- c()
+    #   for (season in specials$season) {
+    #     periods <- c(periods, season$period)
+    #   }
+    #   if (any(duplicated(periods))) {
+    #     rlang::abort("No more than one seasonal model can be specified for a single period.")
+    #   }
+    # }
 
-    for (season in specials$season) {
-      # Regression Seasonality
-
-      if (season$type == "regression") {
-
+    for (seasonal in specials$seasonal) {
 
         # check validity
-        if (!"period" %in% names(season)) {
-          abort("period must be defined for regression seasonality.")
+        if (!"period" %in% names(seasonal)) {
+          rlang::abort("period must be defined for regression seasonality.")
         }
 
         state <- bsts::AddSeasonal(
           state.specification = state,
           y = vec_data,
-          nseasons = season$period
+          nseasons = seasonal$period
         )
+    }
+  }
+
+
 
       # # Trigonometric Seasonality
       #
