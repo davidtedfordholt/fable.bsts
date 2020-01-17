@@ -71,7 +71,7 @@ specials_bsts <- new_specials(
 #' @importFrom stats predict
 train_bsts <- function(.data, specials, iterations = 1000, ...) {
   if (length(tsibble::measured_vars(.data)) > 1) {
-    abort("Only univariate responses are supported by bsts")
+    rlang::abort("Only univariate responses are supported by bsts")
   }
 
   # Prepare data for modelling
@@ -86,10 +86,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check intercept validity
     if (length(specials$intercept) > 1) {
-      abort("The state should include at most one stationary component.")
+      rlang::abort("The state should include at most one stationary component.")
     }
     if ("level" %in% names(specials) || "trend" %in% names(specials)) {
-      abort("If the model includes a traditional trend component (e.g. local level, local linear
+      rlang::abort("If the model includes a traditional trend component (e.g. local level, local linear
             trend, etc) then a separate intercept is not needed (and will probably cause trouble,
             as it will be confounded with the initial state of the trend model).")
     }
@@ -108,7 +108,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check AR validity
     if (length(specials$ar) > 1 || "level" %in% names(specials) || "trend" %in% names(specials)) {
-      abort("The state should include at most one non-stationary trend component, include trends,
+      rlang::abort("The state should include at most one non-stationary trend component, include trends,
             levels, or autoregressive models.")
     }
 
@@ -160,7 +160,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check for trend validity
     if (length(specials$trend) > 1) {
-      abort("The state should include at most one non-stationary trend component, include trends,
+      rlang::abort("The state should include at most one non-stationary trend component, include trends,
             levels, or autoregressive models.")
     }
 
