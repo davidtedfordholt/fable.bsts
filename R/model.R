@@ -358,7 +358,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #' with a random walk trend, additive seasonality and exogenous regressors.
 #' These can be specified using the 'specials' functions detailed
 #' below. The introduction vignette provides more details on how to model data
-#' using this interface to prophet: `vignette("intro", package="fable.bsts")`.
+#' using this interface to bsts: `vignette("intro", package="fable.bsts")`.
 #'
 #' @param formula A symbolic description of the model to be fitted of class `formula`.
 #' @inheritParams bsts::bsts
@@ -644,13 +644,13 @@ components.fbl_bsts <- function(object, ...) {
 #' }
 #'
 #' @export
-# glance.fbl_bsts <- function(x, ...){
+glance.fbl_bsts <- function(x, ...){
 #   changepoints <- tibble(
 #     changepoints = x$model$changepoints,
 #     adjustment = as.numeric(x$model$params$delta)
 #   )
 #   tibble(sigma = stats::sd(x$est$.resid, na.rm = TRUE), changepoints = list(changepoints))
-# }
+}
 
 # EXTRACT COEFFICIENTS =============================================================================
 
@@ -674,7 +674,7 @@ components.fbl_bsts <- function(object, ...) {
 #' }
 #'
 #' @export
-# tidy.fbl_bsts <- function(x, ...){
+tidy.fbl_bsts <- function(x, ...){
 #   growth_terms <- c("base_growth", "trend_offset")
 #
 #   seas_terms <- map2(
@@ -704,7 +704,7 @@ components.fbl_bsts <- function(object, ...) {
 #     term = invoke(c, c(growth_terms, seas_terms, hol_terms, xreg_terms)),
 #     estimate = c(x$model$params$k, x$model$params$m, x$model$params$beta)
 #   )
-# }
+}
 
 # IDENTITY =========================================================================================
 
