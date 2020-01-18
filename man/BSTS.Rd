@@ -71,19 +71,34 @@ trend(type = c("locallinear", "semilocallinear", "studentlocallinear"))
 }
 }
 
-\subsection{season}{
-The \code{season} special is used to specify a seasonal component.
+\subsection{seasonal}{
+The \code{seasonal} special is used to specify a seasonal component.
 This special can be used multiple times for different seasonalities.
 
 \strong{Warning: The inputs controlling the seasonal \code{period} is different than \code{\link[bsts:bsts]{bsts::bsts()}}. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.}
 
 \preformatted{
-season(type = c("regression", "trig", "monthlyannual"), period = NULL)
+seasonal(period = NULL)
 }
 
 \tabular{ll}{
-\code{type}  \tab The type of seasonality (seasonal regression, trigonometric, or monthly-annual cycle).\cr
 \code{period}   \tab The periodic nature of the seasonality. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using \code{lubridate::as.period}, allowing seasonal periods such as "2 years".\cr
+}
+}
+
+\subsection{trig}{
+The \code{trig} special is used to specify a trigonometric seasonal component.
+This special can be used multiple times for different seasonalities.
+
+\strong{Warning: The inputs controlling the seasonal \code{period} is different than \code{\link[bsts:bsts]{bsts::bsts()}}. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.}
+
+\preformatted{
+trig(period = NULL, frequencies = 1)
+}
+
+\tabular{ll}{
+\code{period}   \tab The length of the longest cycle. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using \code{lubridate::as.period}, allowing seasonal periods such as "2 years".\cr
+\code{frequencies}  \tab A vector of positive real numbers giving the number of times each cyclic component repeats in a period. One sine and one cosine term will be added for each frequency.\cr
 }
 }
 

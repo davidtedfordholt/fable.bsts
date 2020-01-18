@@ -4,7 +4,7 @@
 \alias{forecast.fbl_bsts}
 \title{Produce forecasts from the bsts model}
 \usage{
-\method{forecast}{fbl_bsts}(object, new_data, specials = NULL, iterations = NULL, ...)
+\method{forecast}{fbl_bsts}(object, new_data, specials = NULL, ...)
 }
 \arguments{
 \item{object}{The time series model used to produce the forecasts}
