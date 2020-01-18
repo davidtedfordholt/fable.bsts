@@ -16,7 +16,10 @@ knitr::opts_chunk$set(
 ```
  
 ```{r setup, results = 'hide'}
+library(tidyverse)
 library(tsibble)
+library(fable)
+library(fabletools)
 library(fable.bsts)
 ```
 
@@ -24,17 +27,16 @@ The `fable.bsts` package provides an interface allowing the [bsts forecasting pr
 
 ## Tidy temporal data
 
-The tidy temporal data structure [tsibble](http://tsibbledata.tidyverts.org/) is used to represent time series data. A `tsibble` extends the `data.frame` used in the [bsts](https://cran.r-project.org/package=bsts) package with the concepts of `index` and `key` variables. The `index` refers to the column of data containing the observations measurement time (the `ds` column in prophet). The `key` variables are used to uniquely identify each time series in the dataset, allowing separate prophet models to be applied on each time series.
+The tidy temporal data structure [tsibble](http://tsibbledata.tidyverts.org/) is used to represent time series data. A `tsibble` extends the `data.frame` used in the [bsts](https://cran.r-project.org/package=bsts) package with the concepts of `index` and `key` variables. The `index` refers to the column of data containing the observations measurement time. The `key` variables are used to uniquely identify each time series in the dataset, allowing separate bsts models to be applied on each time series.
 
 For this analysis let's compare the number of domestic and international passengers passing through Los Angeles International Airport. The data is published by data.lacity.org and available on [data.gov](https://catalog.data.gov/dataset/los-angeles-international-airport-passenger-traffic-by-terminal-756ee). The data is re-hosted in this package's GitHub repository for reproducibility.
 
 ```{r data, message = FALSE}
 # Read in the data
-lax_passengers <- read.csv("https://raw.githubusercontent.com/mitchelloharawild/fable.prophet/master/data-raw/lax_passengers.csv")
+source("data-raw/lax_passengers.R")
+data <- fill_gaps(lax_passengers)
 
 # Tidy and summarise the data for comparison of international and domestic passenger counts
-library(dplyr)
-library(lubridate)
 lax_passengers <- lax_passengers %>%
   mutate(datetime = mdy_hms(ReportPeriod)) %>%
   group_by(month = yearmonth(datetime), type = Domestic_International) %>%
@@ -53,8 +55,6 @@ lax_passengers <- as_tsibble(lax_passengers, index = month, key = type)
 lax_passengers
 ```
 
-When using `fable.prophet`, it is not necessary to have the time column named `ds` and the response column called `y`.
-
 ## Data exploration
 
 Before modelling, we should first have a look at the data. There are many ways in which time series data can be visualised, and as a `tsibble` is in a tabular format you can easily create informative graphics with [ggplot2](https://cran.r-project.org/package=ggplot2). The easiest way to have a quickly see your data is with a time series plot via `autoplot()`.
@@ -64,13 +64,13 @@ lax_passengers %>%
   autoplot(passengers)
 ```
 
-Each series appears to have a piecewise linear trend and multiplicative seasonality, which we should consider when creating our prophet model. The [feasts](https://cran.r-project.org/package=feasts) and [sugrrants](https://cran.r-project.org/package=sugrrants) packages provide additional plotting tools for time series data.
+Each series appears to have a local linear trend and seasonality, which we should consider when creating our bsts model. The [feasts](https://cran.r-project.org/package=feasts) and [sugrrants](https://cran.r-project.org/package=sugrrants) packages provide additional plotting tools for time series data.
 
-## Prophet modelling
+## bsts modelling
 
-A prophet model is specified using the `prophet()` function. If you've loaded both `prophet` and `fable.prophet` packages, you should refer to this function explicitly with `fable.prophet::prophet()`. This function uses a formula based model specification (`y ~ x`), where the left of the formula specifies the response variable, and the right specifies the model's predictive terms.
+A bsts model is specified using the `BSTS()` function. This function uses a formula based model specification (`y ~ x`), where the left of the formula specifies the response variable, and the right specifies the model's predictive terms.
 
-A prophet model supports piecewise linear or exponential growth (trend), additive or multiplicative seasonality, holiday effects and exogenous regressors. More details about how to specify these terms can be found in the help file, `?prophet`.
+A bsts model supports static intercepts, levels, autoregressive models, , additive or multiplicative seasonality, holiday effects and exogenous regressors. More details about how to specify these terms can be found in the help file, `?prophet`.
 
 To specify a linear growth and a annual multiplicative seasonal pattern for the passengers data above, you would use:
 
