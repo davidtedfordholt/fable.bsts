@@ -3,7 +3,7 @@ library(tidyverse)
 library(fable)
 library(fabletools)
 library(future)
-plan(multisession)
+plan(sequential)
 
 source("data-raw/lax_passengers.R")
 data <- lax_passengers %>%
