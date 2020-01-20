@@ -25,11 +25,12 @@ specials_bsts <- new_specials(
   ,seasonal = function(period = NULL) {
     # Extract data interval
     interval <- tsibble::interval(self$data)
-    interval <- with(interval, lubridate::years(year) +
-                       lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
-                       lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
-                       lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
-                       lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
+    interval <- with(
+      interval, lubridate::years(year) +
+        lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
+        lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
+        lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
+        lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
 
     # Compute bsts interval
     period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
