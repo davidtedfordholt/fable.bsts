@@ -9,10 +9,19 @@ source("data-raw/lax_passengers.R")
 data <- lax_passengers %>%
   fill_gaps()
 
+data <- tsibbledata::vic_elec %>%
+  as_tibble() %>%
+  group_by(Date) %>%
+  summarize(Demand = mean(Demand),
+            Temperature = mean(Temperature),
+            Holiday = all(Holiday)) %>%
+  tsibble::as_tsibble()
+
+
 data %>%
   fabletools::model(
-    naive = fable::NAIVE(passengers)
-    ,arima = fable::ARIMA(passengers)
+    naive = fable::NAIVE(Demand)
+    ,arima = fable::ARIMA(Demand)
     # ,bsts_intercept = BSTS(passengers ~ intercept(),
     #                        iterations = 200)
     # ,bsts_autoar = BSTS(passengers ~ ar("auto"),
@@ -35,10 +44,10 @@ data %>%
     #                         iterations = 200)
     # ,bsts_semi_seas = BSTS(passengers ~ seasonal("1 week") + trend("semilocal"),
     #                        iterations = 200)
-    # ,bsts_trig = BSTS(passengers ~ trig(period = "1 week", frequencies = 1),
-    #                   iterations = 200)
-    # ,bsts_cycle = BSTS(passengers ~ cycle(),
-    #                    iterations = 200)
+     ,bsts_trig = BSTS(Demand ~ level() + trig(period = "1 week", frequencies = 1),
+                       iterations = 200)
+     ,bsts_cycle = BSTS(Demand ~ level() + cycle(),
+                        iterations = 200)
   ) %>%
   fabletools::forecast(h = 100) %>%
   autoplot(data = data) +
