@@ -261,6 +261,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     for (cycle in specials$cycle){
 
+      state <- bsts::AddMonthlyAnnualCycle(
+        state.specification = state,
+        y = vec_data,
+        date.of.first.observation = cycle$date_of_first_observation
+      )
 
     }
 
