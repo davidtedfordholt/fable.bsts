@@ -1,11 +1,12 @@
-devtools::load_all(".")
+# devtools::load_all(".")
 library(tidyverse)
 library(fable)
 library(fabletools)
 library(future)
-plan(sequential)
 
+plan(multisession)
 
+tictoc::tic()
 data <- tsibbledata::vic_elec %>%
   tsibble::index_by(day = as.Date(Time)) %>%
   # tsibble::index_by(month = tsibble::yearmonth(Time)) %>%
@@ -32,7 +33,7 @@ data %>%
                          iterations = 500)
     ,bsts_int_autoar = BSTS(Demand ~ intercept() + ar("auto"),
                             iterations = 500)
-    ,bsts_seasonal = BSTS(Demand ~ seasonal(period = "1 week"),
+    ,bsts_seasonal = BSTS(Demand ~ level() + seasonal(period = "1 week"),
                           iterations = 500)
     ,bsts_seas_local = BSTS(Demand ~ seasonal("1 week") + trend(),
                             iterations = 500)
@@ -44,6 +45,6 @@ data %>%
                        iterations = 500)
   ) %>%
   fabletools::forecast(h = 100) %>%
-  fabletools::autoplot(data = data %>%
-                         filter(day >= as.Date("2014-10-01"))) +
+  fabletools::autoplot(data = data) +
   ggplot2::facet_wrap(~ .model)
+tictoc::toc()
