@@ -528,7 +528,7 @@ BSTS <- function(formula, ...) {
 #' }
 #'
 #' @export
-forecast.fbl_bsts <- function(object, new_data, specials = NULL, ...) {
+forecast.fbl_bsts <- function(object, new_data, iterations, specials = NULL, ...) {
   mdl <- object$model
 
   if (rlang::is_missing(iterations)) {
