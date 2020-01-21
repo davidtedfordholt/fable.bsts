@@ -52,10 +52,12 @@ specials_bsts <- new_specials(
 
     as.list(environment())
   }
-  ,cycle = function() {
+  ,cycle = function(date_of_first_observation = NULL) {
     if (frequency(self$data) != 7) {
       abort("Monthly-annual cycle can only be used with daily data.")
     }
+
+    date_of_first_observation <- lubridate::as_date(min(dplyr::pull(self$data[tsibble::index_var(self$data)])))
 
     as.list(environment())
   }
@@ -255,7 +257,14 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # CYCLE ------------------------------------------------------------------------------------------
 
+  if ("cycle" %in% names(specials)){
 
+    for (cycle in specials$cycle){
+
+
+    }
+
+  }
 
 
   # HOLIDAYS ---------------------------------------------------------------------------------------
