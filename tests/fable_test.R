@@ -15,8 +15,8 @@ data %>%
     ,arima = fable::ARIMA(passengers)
     # ,bsts_intercept = BSTS(passengers ~ intercept(),
     #                        iterations = 200)
-    ,bsts_autoar = BSTS(passengers ~ ar("auto"),
-                        iterations = 200)
+    # ,bsts_autoar = BSTS(passengers ~ ar("auto"),
+    #                    iterations = 200)
     # ,bsts_ar = BSTS(passengers ~ ar("specified", lags = 2),
     #                 iterations = 200)
     # ,bsts_level = BSTS(passengers ~ level(),
@@ -37,6 +37,8 @@ data %>%
     #                        iterations = 200)
     # ,bsts_trig = BSTS(passengers ~ trig(period = "1 week", frequencies = 1),
     #                   iterations = 200)
+    # ,bsts_cycle = BSTS(passengers ~ cycle(),
+    #                    iterations = 200)
   ) %>%
   fabletools::forecast(h = 100) %>%
   autoplot(data = data) +
