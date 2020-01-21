@@ -261,6 +261,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     for (cycle in specials$cycle){
 
+      # Check Validity
+      if (!"date_of_first_observation" %in% names(cycle)){
+        rlang::abort("date_of_first_observation must be defined for monthly-annual cycle.")
+      }
+
       state <- bsts::AddMonthlyAnnualCycle(
         state.specification = state,
         y = vec_data,
