@@ -364,7 +364,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     list(
       model = mdl
       ,est = list(
-        .fitted = v ec_data - colMeans(mdl$one.step.prediction.errors),
+        .fitted = vec_data - colMeans(mdl$one.step.prediction.errors),
         .resid = colMeans(mdl$one.step.prediction.errors))
       ,components =
         as_tsibble_quietly(
