@@ -15,14 +15,13 @@ not all functionality from the package has been implemented.*
 
 ## Completed
 
-  - Stationary and non-stationary trends
-  - Regression and trigonometric seasonalities
+  - Stationary and non-stationary trend models
+  - Regression, trigonometric and monthly-annual cycle seasonal models
 
 ## In Progress
 
   - Holiday models
   - Exogenous regressors
-  - Monthly-annual cycle models
   - User-specified priors
 
 ## Use
