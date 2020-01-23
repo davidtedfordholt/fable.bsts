@@ -53,10 +53,12 @@ specials_bsts <- new_specials(
 
     as.list(environment())
   }
-  ,cycle = function() {
+  ,cycle = function(date_of_first_observation = NULL) {
     if (frequency(self$data) != 7) {
       abort("Monthly-annual cycle can only be used with daily data.")
     }
+
+    date_of_first_observation <- lubridate::as_date(min(dplyr::pull(self$data[tsibble::index_var(self$data)])))
 
     as.list(environment())
   }
@@ -256,7 +258,24 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # CYCLE ------------------------------------------------------------------------------------------
 
+  if ("cycle" %in% names(specials)){
 
+    for (cycle in specials$cycle){
+
+      # Check Validity
+      if (!"date_of_first_observation" %in% names(cycle)){
+        rlang::abort("date_of_first_observation must be defined for monthly-annual cycle.")
+      }
+
+      state <- bsts::AddMonthlyAnnualCycle(
+        state.specification = state,
+        y = vec_data,
+        date.of.first.observation = cycle$date_of_first_observation
+      )
+
+    }
+
+  }
 
 
   # HOLIDAYS ---------------------------------------------------------------------------------------
@@ -323,6 +342,14 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # TRAIN MODEL ------------------------------------------------------------------------------------
 
+  # bsts_quietly <- purrr::quietly(bsts::bsts)
+  #
+  # mdl <- bsts_quietly(
+  #   vec_data,
+  #   state.specification = state,
+  #   niter = iterations
+  # )
+
   mdl <- bsts::bsts(
     vec_data,
     state.specification = state,
@@ -331,14 +358,18 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # RETURN MODEL -----------------------------------------------------------------------------------
 
+  as_tsibble_quietly <- purrr::quietly(tsibble::as_tsibble)
+
   structure(
     list(
       model = mdl
       ,est = list(
-        .fitted = vec_data - colMeans(mdl$one.step.prediction.errors),
+        .fitted = v ec_data - colMeans(mdl$one.step.prediction.errors),
         .resid = colMeans(mdl$one.step.prediction.errors))
-      ,components = tsibble::as_tsibble(
-        cbind.data.frame(.data, t(colMeans(mdl$state.contributions))))
+      ,components =
+        as_tsibble_quietly(
+          cbind.data.frame(.data, t(colMeans(mdl$state.contributions)))
+        )
       ,iterations = iterations
       ),
     class = "fbl_bsts")
@@ -479,8 +510,8 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #'
 #' @export
 BSTS <- function(formula, ...) {
-  bsts_model <- new_model_class("bsts", train_bsts, specials_bsts)
-  new_model_definition(bsts_model, !!enquo(formula), ...)
+  bsts_model <- fabletools::new_model_class("bsts", train_bsts, specials_bsts)
+  fabletools::new_model_definition(bsts_model, !!rlang::enquo(formula), ...)
 }
 
 # FORECAST MODEL ===================================================================================
@@ -512,10 +543,7 @@ BSTS <- function(formula, ...) {
 #' @export
 forecast.fbl_bsts <- function(object, new_data, specials = NULL, ...) {
   mdl <- object$model
-
-  if (rlang::is_missing(iterations)) {
-    iterations <- mdl$iterations
-  }
+  iterations <- object$iterations
 
   # new_data will include a tsibble with the dates for prediction
 
