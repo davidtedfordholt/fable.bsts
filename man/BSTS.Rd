@@ -26,7 +26,7 @@ A bsts model supports local and semi-local linear trends, local levels
 with a random walk trend, additive seasonality and exogenous regressors.
 These can be specified using the 'specials' functions detailed
 below. The introduction vignette provides more details on how to model data
-using this interface to prophet: \code{vignette("intro", package="fable.bsts")}.
+using this interface to bsts: \code{vignette("intro", package="fable.bsts")}.
 }
 \section{Specials}{
 
@@ -75,14 +75,17 @@ trend(type = c("locallinear", "semilocallinear", "studentlocallinear"))
 The \code{seasonal} special is used to specify a seasonal component.
 This special can be used multiple times for different seasonalities.
 
-\strong{Warning: The inputs controlling the seasonal \code{period} is different than \code{\link[bsts:bsts]{bsts::bsts()}}. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.}
+\strong{Warning: Numeric inputs are treated as the number of observations in each seasonal period,}
+\strong{not the number of days.}
 
 \preformatted{
 seasonal(period = NULL)
 }
 
 \tabular{ll}{
-\code{period}   \tab The periodic nature of the seasonality. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using \code{lubridate::as.period}, allowing seasonal periods such as "2 years".\cr
+\code{period}   \tab The periodic nature of the seasonality. If a number is given, it will specify
+the number of observations in each seasonal period. If a character is given, it will be parsed
+using \code{lubridate::as.period}, allowing seasonal periods such as "2 years".\cr
 }
 }
 
@@ -90,15 +93,20 @@ seasonal(period = NULL)
 The \code{trig} special is used to specify a trigonometric seasonal component.
 This special can be used multiple times for different seasonalities.
 
-\strong{Warning: The inputs controlling the seasonal \code{period} is different than \code{\link[bsts:bsts]{bsts::bsts()}}. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.}
+\strong{Warning: Numeric inputs are treated as the number of observations in each seasonal period,}
+\strong{not the number of days.}
 
 \preformatted{
 trig(period = NULL, frequencies = 1)
 }
 
 \tabular{ll}{
-\code{period}   \tab The length of the longest cycle. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using \code{lubridate::as.period}, allowing seasonal periods such as "2 years".\cr
-\code{frequencies}  \tab A vector of positive real numbers giving the number of times each cyclic component repeats in a period. One sine and one cosine term will be added for each frequency.\cr
+\code{period}   \tab The length of the longest cycle. If a number is given, it will specify the
+number of observations in each seasonal period. If a character is given, it will be parsed
+using \code{lubridate::as.period}, allowing seasonal periods such as "2 years".\cr
+\code{frequencies}  \tab A vector of positive real numbers giving the number of times each cyclic
+component repeats in a period. One sine and one cosine term will be added for each
+frequency.\cr
 }
 }
 
@@ -109,20 +117,26 @@ holiday(holidays = NULL)
 }
 
 \tabular{ll}{
-\code{holidays}   \tab A \href{https://tsibble.tidyverts.org/}{\code{tsibble}} containing a set of holiday events. The event name is given in the 'holiday' column, and the event date is given via the index. Additionally, "lower_window" and "upper_window" columns can be used to include days before and after the holiday.\cr
+\code{holidays}   \tab A \href{https://tsibble.tidyverts.org/}{\code{tsibble}} containing a set of holiday
+events. The event name is given in the 'holiday' column, and the event date is given via the
+index. Additionally, "lower_window" and "upper_window" columns can be used to include days
+before and after the holiday.\cr
 }
 }
 
 \subsection{xreg}{
-The \code{xreg} special is used to include exogenous regressors in the model. This special can be used multiple times for different regressors with different arguments.
-Exogenous regressors can also be used in the formula without explicitly using the \code{xreg()} special, which will then use the default arguments.
+The \code{xreg} special is used to include exogenous regressors in the model. This special can be used
+multiple times for different regressors with different arguments.
+Exogenous regressors can also be used in the formula without explicitly using the \code{xreg()}
+special, which will then use the default arguments.
 \preformatted{
 xreg(..., prior_scale = NULL, standardize = "auto", type = NULL)
 }
 
 \tabular{ll}{
 \code{...}         \tab A set of bare expressions that are evaluated as exogenous regressors\cr
-\code{standardize} \tab Should the regressor be standardised before fitting? If "auto", it will standardise if the regressor is not binary.\cr
+\code{standardize} \tab Should the regressor be standardised before fitting? If "auto", it will
+standardise if the regressor is not binary.\cr
 }
 }
 }
