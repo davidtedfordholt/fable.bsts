@@ -52,13 +52,7 @@ specials_bsts <- new_specials(
 
     as.list(environment())
   }
-  ,cycle = function(date_of_first_observation = NULL) {
-    if (frequency(self$data) != 7) {
-      abort("Monthly-annual cycle can only be used with daily data.")
-    }
-
-    date_of_first_observation <- lubridate::as_date(min(dplyr::pull(self$data[tsibble::index_var(self$data)])))
-
+  ,cycle = function() {
     as.list(environment())
   }
   # ,holiday = function(type = c("regression", "randomwalk", "hierarchical"),
