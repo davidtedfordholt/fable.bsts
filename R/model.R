@@ -14,8 +14,7 @@ specials_bsts <- new_specials(
     type <- match.arg(type)
     as.list(environment())
   }
-  ,level = function(type = c("local", "shared")) {
-    type <- match.arg(type)
+  ,level = function() {
     as.list(environment())
   }
   ,trend = function(type = c("local", "semilocal", "studentlocal")) {
@@ -156,17 +155,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     level <- specials$level[[1]]
 
-    if (level$type == "local") {
-      state <- bsts::AddLocalLevel(
-        state.specification = state,
-        y = vec_data
-      )
-    } else if (level$type == "shared") {
-      state <- bsts::AddSharedLocalLevel(
-        state.specification = state,
-        y = vec_data
-      )
-    }
+    state <- bsts::AddLocalLevel(
+      state.specification = state,
+      y = vec_data
+    )
+
   }
 
   # TREND ------------------------------------------------------------------------------------------
