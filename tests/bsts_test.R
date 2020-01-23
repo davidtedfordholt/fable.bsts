@@ -4,16 +4,17 @@ library(tsibble)
 library(bsts)
 library(fable)
 
-.data <- pedestrian %>%
-  index_by(day = as_date(Date)) %>%
-  summarise(Count = sum(Count))
+data <- tsibbledata::vic_elec %>%
+  tsibble::index_by(day = as.Date(Time)) %>%
+  # tsibble::index_by(month = tsibble::yearmonth(Time)) %>%
+  dplyr::summarise(Demand = sum(Demand, na.rm = TRUE))
 
-vec_data <- dplyr::pull(.data[tsibble::measured_vars(.data)], 1)
+vec_data <- dplyr::pull(data[tsibble::measured_vars(data)], 1)
 
 state <- list()
 
 # Intercept
-# state <- AddStaticIntercept(state, y = vec_data)
+state <- AddStaticIntercept(state, y = vec_data)
 
 # AR
 # state <- AddAr(state, y = vec_data, lags = 1)
@@ -21,7 +22,6 @@ state <- list()
 
 # Level
 # state <- AddLocalLevel(state, y = vec_data)
-# state <- AddSharedLocalLevel(state, response = matrix())
 
 # Trend
 # state <- AddLocalLinearTrend(state, y = vec_data)
@@ -62,21 +62,21 @@ plot(mdl, "components")
 pred <- predict(mdl, horizon = 50)
 sim <- split(pred$distribution, col(pred$distribution))
 
-construct_fc(
+fabletools::construct_fc(
   point = pred$mean,
   sd = apply(pred$distribution, 2, stats::sd),
-  dist = dist_sim(sim)
+  dist = fabletools::dist_sim(sim)
 )
 
 cmp <- cbind.data.frame(
-  .data, t(colMeans(mdl$state.contributions))) %>%
-  as_tsibble()
+  data, t(colMeans(mdl$state.contributions))) %>%
+  tsibble::as_tsibble()
 
 cmp$.resid <-
   c(NA,
     colMeans(mdl$one.step.prediction.errors)[2:nrow(cmp)])
-mv <- measured_vars(cmp)
-as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
+mv <- tsibble::measured_vars(cmp)
+fabletools::as_dable(cmp, resp = !!sym(mv[1]), method = "bsts",
   aliases = set_names(
     list(expr(!!sym("trend") * (1 + !!sym("multiplicative_terms")) + !!sym("additive_terms") + !!sym(".resid"))),
       mv[1]
