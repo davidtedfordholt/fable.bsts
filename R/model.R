@@ -41,10 +41,10 @@ specials_bsts <- new_specials(
     # Extract data interval
     interval <- tsibble::interval(self$data)
     interval <- with(interval, lubridate::years(year) +
-                       lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
-                       lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
-                       lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
-                       lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
+                    lubridate::period(3*quarter + month, units = "month") + lubridate::weeks(week) +
+                    lubridate::days(day) + lubridate::hours(hour) + lubridate::minutes(minute) +
+                    lubridate::seconds(second) + lubridate::milliseconds(millisecond) +
+                    lubridate::microseconds(microsecond) + lubridate::nanoseconds(nanosecond))
 
     # Compute bsts interval
     period <- fabletools::get_frequencies(period, self$data, .auto = "smallest")
@@ -97,9 +97,13 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
       rlang::abort("The state should include at most one stationary component.")
     }
     if ("level" %in% names(specials) || "trend" %in% names(specials)) {
-      rlang::abort("If the model includes a traditional trend component (e.g. local level, local linear
-            trend, etc) then a separate intercept is not needed (and will probably cause trouble,
-            as it will be confounded with the initial state of the trend model).")
+      rlang::abort(
+        paste(
+          "If the model includes a traditional trend component (e.g. local level, local linear",
+          "trend, etc) then a separate intercept is not needed (and will probably cause",
+          "trouble, as it will be confounded with the initial state of the trend model)."
+        )
+      )
     }
 
     intercept <- specials$intercept[[1]]
@@ -116,8 +120,12 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check AR validity
     if (length(specials$ar) > 1 || "level" %in% names(specials) || "trend" %in% names(specials)) {
-      rlang::abort("The state should include at most one non-stationary trend component, include trends,
-            levels, or autoregressive models.")
+      rlang::abort(
+        paste(
+          "The state should include at most one non-stationary trend component, include trends,",
+          "levels, or autoregressive models."
+        )
+      )
     }
 
     ar <- specials$ar[[1]]
@@ -143,8 +151,12 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check level validity
     if (length(specials$level) > 1 || "trend" %in% names(specials)) {
-      abort("The state should include at most one non-stationary trend component, include trends,
-            levels, or autoregressive models.")
+      abort(
+        paste(
+          "The state should include at most one non-stationary trend component, include trends,",
+          "levels, or autoregressive models."
+        )
+      )
     }
 
     level <- specials$level[[1]]
@@ -162,8 +174,12 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check for trend validity
     if (length(specials$trend) > 1) {
-      rlang::abort("The state should include at most one non-stationary trend component, include trends,
-            levels, or autoregressive models.")
+      rlang::abort(
+        paste(
+          "The state should include at most one non-stationary trend component, include trends,",
+          "levels, or autoregressive models."
+        )
+      )
     }
 
     trend <- specials$trend[[1]]
@@ -427,14 +443,17 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #' The `seasonal` special is used to specify a seasonal component.
 #' This special can be used multiple times for different seasonalities.
 #'
-#' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
+#' **Warning: Numeric inputs are treated as the number of observations in each seasonal period,**
+#' **not the number of days.**
 #'
 #' \preformatted{
 #' seasonal(period = NULL)
 #' }
 #'
 #' \tabular{ll}{
-#'   `period`   \tab The periodic nature of the seasonality. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
+#'   `period`   \tab The periodic nature of the seasonality. If a number is given, it will specify
+#'   the number of observations in each seasonal period. If a character is given, it will be parsed
+#'   using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
 #' }
 #' }
 #'
@@ -442,15 +461,20 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #' The `trig` special is used to specify a trigonometric seasonal component.
 #' This special can be used multiple times for different seasonalities.
 #'
-#' **Warning: The inputs controlling the seasonal `period` is different than [`bsts::bsts()`]. Numeric inputs are treated as the number of observations in each seasonal period, not the number of days.**
+#' **Warning: Numeric inputs are treated as the number of observations in each seasonal period,**
+#' **not the number of days.**
 #'
 #' \preformatted{
 #' trig(period = NULL, frequencies = 1)
 #' }
 #'
 #' \tabular{ll}{
-#'   `period`   \tab The length of the longest cycle. If a number is given, it will specify the number of observations in each seasonal period. If a character is given, it will be parsed using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
-#'   `frequencies`  \tab A vector of positive real numbers giving the number of times each cyclic component repeats in a period. One sine and one cosine term will be added for each frequency.\cr
+#'   `period`   \tab The length of the longest cycle. If a number is given, it will specify the
+#'   number of observations in each seasonal period. If a character is given, it will be parsed
+#'   using `lubridate::as.period`, allowing seasonal periods such as "2 years".\cr
+#'   `frequencies`  \tab A vector of positive real numbers giving the number of times each cyclic
+#'   component repeats in a period. One sine and one cosine term will be added for each
+#'   frequency.\cr
 #' }
 #' }
 #'
@@ -461,20 +485,26 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 #' }
 #'
 #' \tabular{ll}{
-#'   `holidays`   \tab A [`tsibble`](https://tsibble.tidyverts.org/) containing a set of holiday events. The event name is given in the 'holiday' column, and the event date is given via the index. Additionally, "lower_window" and "upper_window" columns can be used to include days before and after the holiday.\cr
+#'   `holidays`   \tab A [`tsibble`](https://tsibble.tidyverts.org/) containing a set of holiday
+#'   events. The event name is given in the 'holiday' column, and the event date is given via the
+#'   index. Additionally, "lower_window" and "upper_window" columns can be used to include days
+#'   before and after the holiday.\cr
 #' }
 #' }
 #'
 #' \subsection{xreg}{
-#' The `xreg` special is used to include exogenous regressors in the model. This special can be used multiple times for different regressors with different arguments.
-#' Exogenous regressors can also be used in the formula without explicitly using the `xreg()` special, which will then use the default arguments.
+#' The `xreg` special is used to include exogenous regressors in the model. This special can be used
+#' multiple times for different regressors with different arguments.
+#' Exogenous regressors can also be used in the formula without explicitly using the `xreg()`
+#' special, which will then use the default arguments.
 #' \preformatted{
 #' xreg(..., prior_scale = NULL, standardize = "auto", type = NULL)
 #' }
 #'
 #' \tabular{ll}{
 #'   `...`         \tab A set of bare expressions that are evaluated as exogenous regressors\cr
-#'   `standardize` \tab Should the regressor be standardised before fitting? If "auto", it will standardise if the regressor is not binary.\cr
+#'   `standardize` \tab Should the regressor be standardised before fitting? If "auto", it will
+#'   standardise if the regressor is not binary.\cr
 #' }
 #' }
 #'
@@ -701,14 +731,16 @@ tidy.fbl_bsts <- function(x, ...){
 #   )
 #
 #   hol_terms <- if (is.null(x$model$holidays)) {
-#     NULL
+#       NULL
 #     } else {
 #       map2(
 #         x$model$holidays$holiday,
-#         map2(x$model$holidays[["lower_window"]]%||%0, x$model$holidays[["upper_window"]]%||%0, seq),
+#         map2(x$model$holidays[["lower_window"]]%||%0,
+#              x$model$holidays[["upper_window"]]%||%0, seq),
 #         function(nm, window){
-#           window <- ifelse(sign(window) == 1, paste0("_+", window), ifelse(sign(window) == -1, paste0("_", window), ""))
-#           paste0(nm, window)
+#           window <- ifelse(sign(window) == 1, paste0("_+", window),
+#                            ifelse(sign(window) == -1, paste0("_", window), ""))
+#         paste0(nm, window)
 #         }
 #       )
 #     }
