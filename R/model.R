@@ -561,10 +561,10 @@ forecast.fbl_bsts <- function(object, new_data, specials = NULL, ...) {
   sim <- split(pred$distribution, col(pred$distribution))
 
   # Return forecasts
-  construct_fc(
+  fabletools::construct_fc(
     point = pred$mean,
-    sd = unname(map_dbl(sim, stats::sd)),
-    dist = dist_sim(sim)
+    sd = unname(purrr::map_dbl(sim, stats::sd)),
+    dist = fabletools::dist_sim(sim)
   )
 }
 
