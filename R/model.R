@@ -77,9 +77,10 @@ specials_bsts <- new_specials(
 # TRAIN MODEL ======================================================================================
 
 #' @importFrom stats predict
+#' @importFrom rlang rlang::abort
 train_bsts <- function(.data, specials, iterations = 1000, ...) {
   if (length(tsibble::measured_vars(.data)) > 1) {
-    abort("Only univariate responses are supported by bsts")
+    rlang::abort("Only univariate responses are supported by bsts")
   }
 
   # Prepare data for modelling
@@ -94,10 +95,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check intercept validity
     if (length(specials$intercept) > 1) {
-      abort("The state should include at most one stationary component.")
+      rlang::abort("The state should include at most one stationary component.")
     }
     if ("level" %in% names(specials) || "trend" %in% names(specials)) {
-      abort("Models with levels, linear trends or regressions don't need intercepts.")
+      rlang::abort("Models with levels, linear trends or regressions don't need intercepts.")
     }
 
     intercept <- specials$intercept[[1]]
@@ -114,7 +115,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check AR validity
     if (length(specials$ar) > 1 || "level" %in% names(specials) || "trend" %in% names(specials)) {
-      abort("The state should include at most one non-stationary trend model (ar, trend, level).")
+      rlang::abort("The state should include at most one non-stationary trend model (ar, trend, level).")
     }
 
     ar <- specials$ar[[1]]
@@ -140,7 +141,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check level validity
     if (length(specials$level) > 1 || "trend" %in% names(specials)) {
-      abort("The state should include at most one non-stationary trend model (ar, trend, level).")
+      rlang::abort("The state should include at most one non-stationary trend model (ar, trend, level).")
     }
 
     level <- specials$level[[1]]
@@ -158,7 +159,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check for trend validity
     if (length(specials$trend) > 1) {
-      abort("The state should include at most one non-stationary trend model (ar, trend, level).")
+      rlang::abort("The state should include at most one non-stationary trend model (ar, trend, level).")
     }
 
     trend <- specials$trend[[1]]
@@ -194,7 +195,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     #     periods <- c(periods, season$period)
     #   }
     #   if (any(duplicated(periods))) {
-    #     rlang::abort("No more than one seasonal model can be specified for a single period.")
+    #     rlang::rlang::abort("No more than one seasonal model can be specified for a single period.")
     #   }
     # }
 
@@ -202,7 +203,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
         # check validity
         if (!"period" %in% names(seasonal)) {
-          abort("period must be defined for regression seasonality.")
+          rlang::abort("period must be defined for regression seasonality.")
         }
 
         state <- bsts::AddSeasonal(
@@ -222,10 +223,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
       # check trig validity
       if (!"period" %in% names(trig) || !"frequencies" %in% names(trig)) {
-        abort("period and frequencies must be defined for trig seasonality.")
+        rlang::abort("period and frequencies must be defined for trig seasonality.")
       }
       if (!trig$period > 0 || any(!trig$frequencies > 0)) {
-        abort("period and frequencies must be positive for trig seasonality.")
+        rlang::abort("period and frequencies must be positive for trig seasonality.")
       }
 
       state <- bsts::AddTrig(
@@ -242,19 +243,19 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   if ("cycle" %in% names(specials)){
 
-    for (cycle in specials$cycle){
-
-      # Check Validity
-      if (frequency(.data) != 7) {
-        abort("Monthly-Annual Cycle (cycle) can only be used with daily data.")
-      }
-
-      state <- bsts::AddMonthlyAnnualCycle(
-        state.specification = state,
-        y = vec_data
-      )
-
+    # check for cycle validity
+    if (length(specials$cycle) > 1) {
+      rlang::abort("Only one Monthly-Annual Cycle can be specified.")
     }
+    if (frequency(.data) != 7) {
+      rlang::abort("Monthly-Annual Cycle (cycle) can only be used with daily data.")
+    }
+
+    state <- bsts::AddMonthlyAnnualCycle(
+      state.specification = state
+      ,y = vec_data
+      ,date.of.first.observation = min(dplyr::pull(.data[tsibble::index_var(.data)], 1))
+    )
 
   }
 
@@ -301,7 +302,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   # if ("xreg" %in% names(specials)) {
   #   xreg_data <-
   #     if (nrow(xreg_data) != length(vec_data)) {
-  #       abort("The number of observations in ")
+  #       rlang::abort("The number of observations in ")
   #     }
   #
   #   for (regressor in specials$xreg) {
@@ -309,7 +310,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   #       model_data[nm] <- regressor$xreg[,nm]
   #
   #       if (nrow(xreg_data) != length(vec_data)) {
-  #         abort("The number of observations in ")
+  #         rlang::abort("The number of observations in ")
   #       }
   #
   #
@@ -334,7 +335,8 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   mdl <- bsts::bsts(
     vec_data,
     state.specification = state,
-    niter = iterations
+    niter = iterations,
+    ping = 0
   )
 
   # RETURN MODEL -----------------------------------------------------------------------------------
@@ -736,10 +738,11 @@ tidy.fbl_bsts <- function(x, ...){
 
 #' @export
 model_sum.fbl_bsts <- function(x){
-  "bsts"
+  "BSTS"
 }
 
 #' @export
 format.fbl_bsts <- function(x, ...){
   "Bayesian Structural Time Series Model"
 }
+
