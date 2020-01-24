@@ -13,10 +13,10 @@ data <- tsibbledata::vic_elec %>%
 
 data %>%
   fabletools::model(
-    naive = fable::NAIVE(log(Demand))
+    naive = fable::NAIVE(Demand)
     ,snaive = fable::SNAIVE(Demand)
     ,arima = fable::ARIMA(Demand)
-    ,bsts_intercept = BSTS(Demand ~ intercept(), iterations = 500)
+    # ,bsts_intercept = BSTS(Demand ~ intercept(), iterations = 500)
     # ,bsts_autoar = BSTS(Demand ~ ar("auto"), iterations = 500)
     # ,bsts_ar = BSTS(Demand ~ ar("specified", lags = 2), iterations = 500)
     # ,bsts_level = BSTS(Demand ~ level(), iterations = 500)
@@ -29,6 +29,7 @@ data %>%
     # ,bsts_semi_seas = BSTS(Demand ~ seasonal("1 week") + trend("semilocal"), iterations = 500)
     # ,bsts_trig = BSTS(Demand ~ level() + trig(period = "1 week"), iterations = 500)
     # ,bsts_cycle = BSTS(Demand ~ level() + cycle(), iterations = 500)
+    # ,bsts_broken = BSTS(Demand ~ intercept() + ar() + level() + trend() + seasonal() + trig())
   ) %>%
   fabletools::forecast(h = 100) %>%
   fabletools::autoplot(data = data) +
