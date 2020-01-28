@@ -234,16 +234,12 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     if (
       # this ensures a full month exists and includes the day before it
       !tbl_data %>%
-      group_by(month = lubridate::floor_date(index, unit = "month")) %>%
-      summarise(n = n()) %>%
+      count(month = lubridate::floor_date(index, unit = "month")) %>%
       mutate(
         days_in_month = lubridate::days_in_month(month),
-        full_month = ifelse(n == days_in_month, TRUE, FALSE),
-        preceeding_day = ifelse(dplyr::lag(n) > 0, TRUE, FALSE),
-        full_month_with_preceeding_day = ifelse(
-          full_month == TRUE & preceeding_day == TRUE, TRUE, FALSE)
+        test = ifelse(n == days_in_month & lag(n) > 0 & lead(n) > 0, TRUE, FALSE)
       ) %>%
-      pull(full_month_with_preceeding_day) %>%
+      pull(test) %>%
       any(na.rm = TRUE)
     ) {
       rlang::abort("Cycle requires at least a full month of data and the preceeding day.")
