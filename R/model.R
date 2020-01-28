@@ -84,7 +84,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   }
 
   # Prepare data for modelling
-  vec_data <- dplyr::pull(.data[tsibble::measured_vars(.data)], 1)
+  tbl_data <- as_tibble(.data)[c(rlang::expr_text(index(.data)), measured_vars(.data))]
+  colnames(tbl_data) <- c("index", "y")
+
+  xts_data <- xts::xts(x = tbl_data$y, order.by = tbl_data$index)
 
   # Initialize state specification
   state <- list()
@@ -103,10 +106,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     intercept <- specials$intercept[[1]]
 
-    state <- bsts::AddStaticIntercept(
-      state.specification = state,
-      y = vec_data
-    )
+    state <- bsts::AddStaticIntercept(state.specification = state, y = xts_data)
   }
 
   # AR and AUTOAR ----------------------------------------------------------------------------------
@@ -121,15 +121,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     ar <- specials$ar[[1]]
 
     if (ar$type == "auto") {
-      state <- bsts::AddAutoAr(
-        state.specification = state,
-        y = vec_data,
+      state <- bsts::AddAutoAr(state.specification = state, y = xts_data,
         lags = ar$lags
       )
     } else if (ar$type == "specified") {
-      state <- bsts::AddAr(
-        state.specification = state,
-        y = vec_data,
+      state <- bsts::AddAr(state.specification = state, y = xts_data,
         lags = ar$lags
       )
     }
@@ -146,10 +142,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     level <- specials$level[[1]]
 
-    state <- bsts::AddLocalLevel(
-      state.specification = state,
-      y = vec_data
-    )
+    state <- bsts::AddLocalLevel(state.specification = state, y = xts_data)
 
   }
 
@@ -165,19 +158,11 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     trend <- specials$trend[[1]]
 
     if (trend$type == "local") {
-      state <- bsts::AddLocalLinearTrend(
-        state.specification = state,
-        y = vec_data
-      )
+      state <- bsts::AddLocalLinearTrend(state.specification = state, y = xts_data)
     } else if (trend$type == "semilocal") {
-      state <- bsts::AddSemilocalLinearTrend(
-        state.specification = state,
-        y = vec_data
-      )
+      state <- bsts::AddSemilocalLinearTrend(state.specification = state, y = xts_data)
     } else if (trend$type == "studentlocal") {
-      state <- bsts::AddStudentLocalLinearTrend(
-        state.specification = state,
-        y = vec_data,
+      state <- bsts::AddStudentLocalLinearTrend(state.specification = state, y = xts_data,
         save.weights = FALSE
       )
     }
@@ -206,9 +191,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
           rlang::abort("period must be defined for regression seasonality.")
         }
 
-        state <- bsts::AddSeasonal(
-          state.specification = state,
-          y = vec_data,
+        state <- bsts::AddSeasonal(state.specification = state, y = xts_data,
           nseasons = seasonal$period
         )
     }
@@ -229,9 +212,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
         rlang::abort("period and frequencies must be positive for trig seasonality.")
       }
 
-      state <- bsts::AddTrig(
-        state.specification = state,
-        y = vec_data,
+      state <- bsts::AddTrig(state.specification = state, y = xts_data,
         period = trig$period,
         frequencies = trig$frequencies
       )
@@ -245,18 +226,30 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     # check for cycle validity
     if (length(specials$cycle) > 1) {
-      rlang::abort("Only one Monthly-Annual Cycle can be specified.")
+      rlang::abort("Only one Monthly-Annual Cycle (cycle) can be specified.")
     }
     if (frequency(.data) != 7) {
       rlang::abort("Monthly-Annual Cycle (cycle) can only be used with daily data.")
     }
+    if (
+      # this ensures a full month exists and includes the day before it
+      !tbl_data %>%
+      group_by(month = lubridate::floor_date(index, unit = "month")) %>%
+      summarise(n = n()) %>%
+      mutate(
+        days_in_month = lubridate::days_in_month(month),
+        full_month = ifelse(n == days_in_month, TRUE, FALSE),
+        preceeding_day = ifelse(dplyr::lag(n) > 0, TRUE, FALSE),
+        full_month_with_preceeding_day = ifelse(
+          full_month == TRUE & preceeding_day == TRUE, TRUE, FALSE)
+      ) %>%
+      pull(full_month_with_preceeding_day) %>%
+      any(na.rm = TRUE)
+    ) {
+      rlang::abort("Cycle requires at least a full month of data and the preceeding day.")
+    }
 
-    state <- bsts::AddMonthlyAnnualCycle(
-      state.specification = state
-      ,y = vec_data
-      ,date.of.first.observation = min(dplyr::pull(.data[tsibble::index_var(.data)], 1))
-    )
-
+    state <- bsts::AddMonthlyAnnualCycle(state.specification = state, y = xts_data)
   }
 
 
@@ -332,11 +325,13 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   #   niter = iterations
   # )
 
+  # rlang::abort("we specified")
+
   mdl <- bsts::bsts(
-    vec_data,
-    state.specification = state,
-    niter = iterations,
-    ping = 0
+    formula = xts_data
+    ,state.specification = state
+    ,niter = iterations
+    ,ping = 0
   )
 
   # RETURN MODEL -----------------------------------------------------------------------------------
@@ -347,7 +342,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     list(
       model = mdl
       ,est = list(
-        .fitted = vec_data - colMeans(mdl$one.step.prediction.errors),
+        .fitted = xts_data - colMeans(mdl$one.step.prediction.errors),
         .resid = colMeans(mdl$one.step.prediction.errors))
       ,components =
         as_tsibble_quietly(
