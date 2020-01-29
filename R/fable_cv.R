@@ -5,9 +5,9 @@ rm(list = ls(all.names = TRUE))
 
 # PACKAGES =========================================================
 
-library(tictoc)
-tictoc::tic("total time")
-tictoc::tic("loading packages")
+# library(tictoc)
+# tictoc::tic("total time")
+# tictoc::tic("loading packages")
 library(tidyverse)
 library(tsibble)
 library(feasts)
@@ -16,8 +16,8 @@ library(fable.prophet)
 library(future)
 library(future.apply)
 library(slide)
-future::plan("multisession")
-tictoc::toc()
+# future::plan("multisession")
+# tictoc::toc()
 
 
 # FUNCTIONS ========================================================
@@ -74,7 +74,7 @@ data <- tsibbledata::vic_elec %>%
 
 # MODELING =========================================================
 
-tictoc::tic("Modeling")
+# tictoc::tic("Modeling")
 object <-
   data %>%
   create_cutoff_dates(n_cv = 62, horizon = 14)
@@ -84,5 +84,5 @@ forecasts <-
   create_forecasts_for_all_cutoffs()
 
 
-tictoc::toc()
-tictoc::toc()
+# tictoc::toc()
+# tictoc::toc()
