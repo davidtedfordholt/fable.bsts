@@ -7,7 +7,7 @@ library(fable)
 .data <- nyc_bikes %>%
   index_by(day = as.Date(start_time)) %>%
   # tsibble::index_by(month = tsibble::yearmonth(Time)) %>%
-  # group_by_key() %>%
+  group_by_key() %>%
   summarise(trips = n()) %>%
   fill_gaps(trips = 0)
 
@@ -15,6 +15,11 @@ iterations <- 100
 horizon <- 100
 
 .data <- .data %>% filter(bike_id == 26301)
+
+.data$var_1 <- runif(n = nrow(.data))
+.data$var_2 <- runif(n = nrow(.data))
+regressors <- list()
+regressors$xreg <- model.matrix(~ var_1 + var_2, .data)
 
 zoo_data <- zoo::zoo(
   x = dplyr::pull(.data[tsibble::measured_vars(.data)], 1),
@@ -235,26 +240,24 @@ if ("cycle" %in% names(specials)){
 
 # EXOGENOUS REGRESSORS ---------------------------------------------------------------------------
 
-# if ("xreg" %in% names(specials)) {
-#   xreg_data <-
-#     if (nrow(xreg_data) != length(vec_data)) {
-#       rlang::abort("The number of observations in ")
-#     }
-#
-#   for (regressor in specials$xreg) {
-#     for (nm in colnames(regressor$xreg)) {
-#       model_data[nm] <- regressor$xreg[,nm]
-#
-#       if (nrow(xreg_data) != length(vec_data)) {
-#         rlang::abort("The number of observations in ")
-#       }
-#
-#
-#       state <- bsts::AddDynamicRegression(
-#         state, name = nm, )
-#     }
-#   }
-# }
+if ("xreg" %in% names(specials)) {
+
+  for (regressor in specials$xreg) {
+    for (nm in colnames(regressor$xreg)) {
+      model_data[nm] <- regressor$xreg[,nm]
+
+      if (nrow(xreg_data) != length(vec_data)) {
+        rlang::abort("The number of observations in ")
+      }
+
+
+      state <- bsts::AddDynamicRegression(
+        state.specification = state,
+        formula = model_formula,
+        data = model_data)
+    }
+  }
+}
 
 
 
