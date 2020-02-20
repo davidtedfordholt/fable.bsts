@@ -60,18 +60,16 @@ specials_bsts <- new_specials(
   #   type <- match.arg(type)
   #   as.list(environment())
   # }
-  # ,xreg = function(..., lags = 1, standardize = "auto", type = NULL) {
-  #   model_formula <- new_formula(
-  #     lhs = NULL,
-  #     rhs = reduce(c(0, enexprs(...)), function(.x, .y) call2("+", .x, .y))
-  #   )
-  #   list(
-  #     xreg = model.matrix(model_formula, self$data),
-  #     prior_scale = prior_scale,
-  #     standardize = standardize,
-  #     mode = type
-  #   )
-  # }
+  ,xreg = function(..., type = NULL) {
+    model_formula <- rlang::new_formula(
+      lhs = NULL,
+      rhs = purrr::reduce(c(0, rlang::enexprs(...)), function(.x, .y) rlang::call2("+", .x, .y))
+    )
+    list(
+      model_formula = model_formula,
+      xreg = model.matrix(model_formula, self$data)
+    )
+  }
 )
 
 # TRAIN MODEL ======================================================================================
@@ -84,10 +82,10 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   }
 
   # Prepare data for modelling
-  tbl_data <- as_tibble(.data)[c(rlang::expr_text(index(.data)), measured_vars(.data))]
-  colnames(tbl_data) <- c("index", "y")
+  model_data <- as_tibble(.data)[c(rlang::expr_text(index(.data)), measured_vars(.data))]
+  colnames(model_data) <- c("index", "y")
 
-  xts_data <- xts::xts(x = tbl_data$y, order.by = tbl_data$index)
+  xts_data <- xts::xts(x = model_data$y, order.by = model_data$index)
 
   # Initialize state specification
   state <- list()
@@ -233,7 +231,7 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
     }
     if (
       # this ensures a full month exists and includes the day before it
-      !tbl_data %>%
+      !model_data %>%
       count(month = lubridate::floor_date(index, unit = "month")) %>%
       mutate(
         days_in_month = lubridate::days_in_month(month),
@@ -288,26 +286,20 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # EXOGENOUS REGRESSORS ---------------------------------------------------------------------------
 
-  # if ("xreg" %in% names(specials)) {
-  #   xreg_data <-
-  #     if (nrow(xreg_data) != length(vec_data)) {
-  #       rlang::abort("The number of observations in ")
-  #     }
-  #
-  #   for (regressor in specials$xreg) {
-  #     for (nm in colnames(regressor$xreg)) {
-  #       model_data[nm] <- regressor$xreg[,nm]
-  #
-  #       if (nrow(xreg_data) != length(vec_data)) {
-  #         rlang::abort("The number of observations in ")
-  #       }
-  #
-  #
-  #       state <- bsts::AddDynamicRegression(
-  #         state, name = nm, )
-  #     }
-  #   }
-  # }
+  if ("xreg" %in% names(specials)) {
+
+    for (regressor in specials$xreg) {
+      for (nm in colnames(regressor$xreg)) {
+        model_data[nm] <- regressor$xreg[,nm]
+        print(regressor$model_formula)
+
+        state <- bsts::AddDynamicRegression(
+          state.specification = state,
+          formula = regressor$model_formula,
+          data = model_data)
+      }
+    }
+  }
 
 
 
