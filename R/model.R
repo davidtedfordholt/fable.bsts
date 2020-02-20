@@ -72,6 +72,7 @@ specials_bsts <- new_specials(
   }
 )
 
+
 # TRAIN MODEL ======================================================================================
 
 #' @importFrom stats predict
@@ -289,15 +290,17 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
   if ("xreg" %in% names(specials)) {
 
     for (regressor in specials$xreg) {
-      for (nm in colnames(regressor$xreg)) {
-        model_data[nm] <- regressor$xreg[,nm]
-        print(regressor$model_formula)
+      model_data <- bind_cols(model_data, regressor$xreg)
+      regressor_formula <-
+        new_formula(
+          lhs = y,
+          rhs = something
+        )
 
-        state <- bsts::AddDynamicRegression(
-          state.specification = state,
-          formula = regressor$model_formula,
-          data = model_data)
-      }
+      state <- bsts::AddDynamicRegression(
+        state.specification = state,
+        formula = regressor_formula,
+        data = regressor_data)
     }
   }
 
