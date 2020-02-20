@@ -1,6 +1,7 @@
 library(dplyr)
 library(lubridate)
 library(tsibble)
+library(tsibbledata)
 library(bsts)
 library(fable)
 
@@ -27,7 +28,7 @@ zoo_data <- zoo::zoo(
   order.by = dplyr::pull(.data[tsibble::index_var(.data)], 1)
 )
 
-model_data <- as_tibble(.data)[c(rlang::expr_text(index(.data)), measured_vars(.data))][, 1:2]
+model_data <- as_tibble(.data)[c(index_var(.data), measured_vars(.data))][, 1:2]
 colnames(model_data) <- c("index", "y")
 
 
@@ -45,7 +46,6 @@ for (regressor in specials$xreg) {
     if (nrow(xreg_data) != length(vec_data)) {
       rlang::abort("The number of observations in ")
     }
-
 
     state <- bsts::AddDynamicRegression(
       state.specification = state,
