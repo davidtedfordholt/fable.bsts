@@ -28,7 +28,7 @@ horizon <- 100
 
 mbl <-
   .data %>%
-  filter(bike_id != 33074) %>%
+  # filter(bike_id != 33074) %>%
   # filter(bike_id != 33074 && bike_id != 31735 && bike_id != 31681) %>%
   model(
     naive = NAIVE(trips)
@@ -47,8 +47,9 @@ mbl <-
     # ,bsts_seas_local = BSTS(trips ~ seasonal("1 week") + trend(), iterations = iterations)
     # ,bsts_semi_seas = BSTS(trips ~ seasonal("1 week") + trend("semilocal"), iterations = iterations)
     # ,bsts_trig = BSTS(trips ~ level() + trig(period = "1 week"), iterations = iterations)
-    ,bsts_cycle = BSTS(trips ~ trend() + cycle(), iterations = iterations)
+    # ,bsts_cycle = BSTS(trips ~ trend() + cycle(), iterations = iterations)
     # ,bsts_broken = BSTS(trips ~ intercept() + ar() + level() + trend() + seasonal() + trig())
+    ,bsts_xreg = BSTS(trips ~ var_1 + intercept())
   )
 
 fbl <-
