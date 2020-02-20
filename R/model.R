@@ -291,16 +291,17 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
     for (regressor in specials$xreg) {
       model_data <- bind_cols(model_data, regressor$xreg)
+      columns <- paste(colnames(regressor$xreg), collapse = " + ")
       regressor_formula <-
-        new_formula(
-          lhs = y,
-          rhs = something
+        rlang::new_formula(
+          lhs = quote(y),
+          rhs = rlang::parse_expr(columns)
         )
 
       state <- bsts::AddDynamicRegression(
         state.specification = state,
         formula = regressor_formula,
-        data = regressor_data)
+        data = model_data)
     }
   }
 
