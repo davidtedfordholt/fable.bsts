@@ -4,6 +4,7 @@ library(tsibble)
 library(tsibbledata)
 library(ggplot2)
 library(bsts)
+library(purrrlyr)
 source("./R/model.R")
 
 # future::plan(multisession)
@@ -44,69 +45,92 @@ winter.olympics <- DateRangeHoliday("WinterOlympicsSince2000",
                                                     "2014-02-23",
                                                     "2018-02-25")))
 
-## Independence Day (fixed)
-holiday.date <- as.Date('2020-07-04')
-
-## Presidents day (nth)
-holiday.date <- as.Date('2020-02-17')
-
-## Arbor Day (last)
-holiday.date <- as.Date('2020-04-24')
 
 ## Ideally, we pass a holiday and a known instance (date) of the holiday, and the rest is parsed for us
 ## Still must pass days before/after, and whether it's a last weekday holiday, nth weekday, fixed, etc
 
+add_holiday <- function(.list = list(), holiday.name, holiday.type = c('fixed', 'nth', 'last'), holiday.date, days.before = rep(1, length(holiday.name)), days.after = rep(1, length(holiday.name)), holiday.df = NULL){
 
-add_holiday <- function(.list = list(), holiday.name, holiday.type = c('fixed', 'nth', 'last'), holiday.date, days.before = rep(1, length(holiday.name)), days.after = rep(1, length(holiday.name))){
+  # coerce args as df if holiday.df is null
+  if(is.null(holiday.df)){
+    # kick out if different lengths
+    if(any(length(holiday.name) != length(holiday.type),
+           length(holiday.name) != length(holiday.date),
+           length(holiday.name) != length(days.before),
+           length(holiday.name) != length(days.after))){
+      stop('all holiday arguments must have same length')
+    }
 
-  holiday.date <- as.Date(holiday.date)
-
-  if(any(length(holiday.name) != length(holiday.type),
-         length(holiday.name) != length(holiday.date),
-         length(holiday.name) != length(days.before),
-         length(holiday.name) != length(days.after))){
-    stop('all holiday arguments must have same length')
+    holiday.df <- tibble(holiday.name, holiday.type, holiday.date, days.before, days.after)
   }
 
-  for(i in 1:length(holiday.name)){
-    holiday.name_i <- holiday.name[i]
-    holiday.type_i <- holiday.type[i]
-    holiday.date_i <- holiday.date[i]
-    days.before_i <- days.before[i]
-    days.after_i <- days.after[i]
-
-    if(holiday.type_i == 'fixed'){
-      .list[[length(.list)+1]] <- FixedDateHoliday(holiday.name_i,
-                                                   month = format(holiday.date_i, '%B'),
-                                                   day = as.integer(format(holiday.date_i, '%d')),
-                                                   days.before = days.before_i,
-                                                   days.after = days.after_i)
-    }
-    if(holiday.type_i == 'nth'){
-      .list[[length(.list)+1]] <- NthWeekdayInMonthHoliday(holiday.name_i,
-                                                           month = format(holiday.date_i, '%B'),
-                                                           day.of.week = weekdays(holiday.date_i),
-                                                           week.number = (as.integer(format(holiday.date_i, '%d')) %/% 7) + 1,
-                                                           days.before = days.before_i,
-                                                           days.after = days.after_i)
-    }
-    if(holiday.type_i == 'last'){
-      .list[[length(.list)+1]] <- LastWeekdayInMonthHoliday(holiday.name_i,
-                                                            month = format(holiday.date_i, '%B'),
-                                                            day.of.week = weekdays(holiday.date_i),
-                                                            days.before = days.before_i,
-                                                            days.after = days.after_i)
-    }
+  # check for NAs in days.before and days.after
+  if(any(is.na(holiday.df$days.before))){
+    warning(sprintf('days.before is NA in row %s, defaulting to 1', paste0(which(is.na(holiday.df$days.before)), sep = ', ')))
+    holiday.df$days.before <- tidyr::replace_na(holiday.df$days.before, 1)
   }
+
+  if(any(is.na(holiday.df$days.after))){
+    warning(sprintf('days.after is NA in row %s, defaulting to 1',
+                    paste0(which(is.na(holiday.df$days.after)), sep = ', ')))
+    holiday.df$days.after <- tidyr::replace_na(holiday.df$days.after, 1)
+  }
+
+  # Kick out if any rows are incomplete
+  if(any(!complete.cases(holiday.df))){
+    stop(sprintf('add_holiday requires complete cases: row %s incomplete',
+                 paste0(which(!complete.cases(holiday.df)), sep = ', ')))
+  }
+
+  # convert holiday.date to date column
+  holiday.df$holiday.date <- as.Date(holiday.df$holiday.date)
+
+
+  int_func <- function(holiday.df){
+    holiday.name <- holiday.df$holiday.name
+    holiday.type <- holiday.df$holiday.type
+    holiday.date <- holiday.df$holiday.date
+    days.before <- holiday.df$days.before
+    days.after <- holiday.df$days.after
+    if(holiday.type == 'fixed'){
+      res <- FixedDateHoliday(holiday.name,
+                              month = format(holiday.date, '%B'),
+                              day = as.integer(format(holiday.date, '%d')),
+                              days.before = days.before,
+                              days.after = days.after)
+    }
+    if(holiday.type == 'nth'){
+      res <- NthWeekdayInMonthHoliday(holiday.name,
+                                      month = format(holiday.date, '%B'),
+                                      day.of.week = weekdays(holiday.date),
+                                      week.number = (as.integer(format(holiday.date, '%d')) %/% 7) + 1,
+                                      days.before = days.before,
+                                      days.after = days.after)
+    }
+    if(holiday.type == 'last'){
+      res <- LastWeekdayInMonthHoliday(holiday.name,
+                                       month = format(holiday.date, '%B'),
+                                       day.of.week = weekdays(holiday.date),
+                                       days.before = days.before,
+                                       days.after = days.after)
+    }
+    res
+  }
+
+  .list <- append(.list, purrrlyr::by_row(holiday.df, int_func)$.out)
   .list
 }
 
+# Pass it individual values
+
 holiday_list <- list()
 
-holiday_list <- holiday_list %>%
+holiday_list %>%
   add_holiday(holiday.name = 'independence_day', holiday.type = 'fixed', holiday.date = '2020-07-04', days.before = 2, days.after = 1) %>%
   add_holiday('presidents_day', 'nth', '2020-02-17', 1, 3) %>%
   add_holiday('arbor_day', 'last', '2020-04-24')
+
+# Pass it vectors
 
 holiday_list <- list()
 
@@ -118,6 +142,15 @@ days.after <- c(2, 2, 1)
 
 holiday_list %>%
   add_holiday(holiday.name, holiday.type, holiday.date)
+
+## Pass it a df
+
+holiday_list <- list()
+
+holidf <- tibble(holiday.name, holiday.type, holiday.date, days.before, days.after)
+
+holiday_list %>%
+  add_holiday(holiday.df = holidf)
 
 
 ## Regression Holiday Models and Hierarchical Regression Holiday Models work with a list
