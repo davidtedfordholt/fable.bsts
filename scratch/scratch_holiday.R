@@ -152,7 +152,6 @@ holidf <- tibble(holiday.name, holiday.type, holiday.date, days.before, days.aft
 holiday_list %>%
   add_holiday(holiday.df = holidf)
 
-
 ## Regression Holiday Models and Hierarchical Regression Holiday Models work with a list
 ## Random Walk Holiday Models do not
 
