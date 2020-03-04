@@ -57,29 +57,46 @@ holiday.date <- as.Date('2020-04-24')
 ## Still must pass days before/after, and whether it's a last weekday holiday, nth weekday, fixed, etc
 
 
-add_holiday <- function(.list = list(), holiday.name, holiday.type = c('fixed', 'nth', 'last'), holiday.date, days.before = 1, days.after = 1){
+add_holiday <- function(.list = list(), holiday.name, holiday.type = c('fixed', 'nth', 'last'), holiday.date, days.before = rep(1, length(holiday.name)), days.after = rep(1, length(holiday.name))){
+
   holiday.date <- as.Date(holiday.date)
-  if(holiday.type == 'fixed'){
-    .list[[length(.list)+1]] <- FixedDateHoliday(holiday.name,
-                     month = format(holiday.date, '%B'),
-                     day = as.integer(format(holiday.date, '%d')),
-                     days.before = days.before,
-                     days.after = days.after)
+
+  if(any(length(holiday.name) != length(holiday.type),
+         length(holiday.name) != length(holiday.date),
+         length(holiday.name) != length(days.before),
+         length(holiday.name) != length(days.after))){
+    stop('all holiday arguments must have same length')
   }
-  if(holiday.type == 'nth'){
-    .list[[length(.list)+1]] <- NthWeekdayInMonthHoliday(holiday.name,
-                             month = format(holiday.date, '%B'),
-                             day.of.week = weekdays(holiday.date),
-                             week.number = (as.integer(format(holiday.date, '%d')) %/% 7) + 1,
-                             days.before = days.before,
-                             days.after = days.after)
-  }
-  if(holiday.type == 'last'){
-    .list[[length(.list)+1]] <- LastWeekdayInMonthHoliday(holiday.name,
-                              month = format(holiday.date, '%B'),
-                              day.of.week = weekdays(holiday.date),
-                              days.before = days.before,
-                              days.after = days.after)
+
+  for(i in 1:length(holiday.name)){
+    holiday.name_i <- holiday.name[i]
+    holiday.type_i <- holiday.type[i]
+    holiday.date_i <- holiday.date[i]
+    days.before_i <- days.before[i]
+    days.after_i <- days.after[i]
+
+    if(holiday.type_i == 'fixed'){
+      .list[[length(.list)+1]] <- FixedDateHoliday(holiday.name_i,
+                                                   month = format(holiday.date_i, '%B'),
+                                                   day = as.integer(format(holiday.date_i, '%d')),
+                                                   days.before = days.before_i,
+                                                   days.after = days.after_i)
+    }
+    if(holiday.type_i == 'nth'){
+      .list[[length(.list)+1]] <- NthWeekdayInMonthHoliday(holiday.name_i,
+                                                           month = format(holiday.date_i, '%B'),
+                                                           day.of.week = weekdays(holiday.date_i),
+                                                           week.number = (as.integer(format(holiday.date_i, '%d')) %/% 7) + 1,
+                                                           days.before = days.before_i,
+                                                           days.after = days.after_i)
+    }
+    if(holiday.type_i == 'last'){
+      .list[[length(.list)+1]] <- LastWeekdayInMonthHoliday(holiday.name_i,
+                                                            month = format(holiday.date_i, '%B'),
+                                                            day.of.week = weekdays(holiday.date_i),
+                                                            days.before = days.before_i,
+                                                            days.after = days.after_i)
+    }
   }
   .list
 }
@@ -90,6 +107,18 @@ holiday_list <- holiday_list %>%
   add_holiday(holiday.name = 'independence_day', holiday.type = 'fixed', holiday.date = '2020-07-04', days.before = 2, days.after = 1) %>%
   add_holiday('presidents_day', 'nth', '2020-02-17', 1, 3) %>%
   add_holiday('arbor_day', 'last', '2020-04-24')
+
+holiday_list <- list()
+
+holiday.name <- c('ind_day', 'pres_day', 'arbor_day')
+holiday.type <- c('fixed', 'nth', 'last')
+holiday.date <- c('2020-07-04', '2020-02-17', '2020-04-24')
+days.before <- c(1, 1, 1)
+days.after <- c(2, 2, 1)
+
+holiday_list %>%
+  add_holiday(holiday.name, holiday.type, holiday.date)
+
 
 ## Regression Holiday Models and Hierarchical Regression Holiday Models work with a list
 ## Random Walk Holiday Models do not
