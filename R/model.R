@@ -55,11 +55,11 @@ specials_bsts <- new_specials(
   ,cycle = function() {
     as.list(environment())
   }
-  # ,holiday = function(type = c("regression", "randomwalk", "hierarchical"),
-  #                    holiday_tbl = NULL, holiday_names = NULL) {
-  #   type <- match.arg(type)
-  #   as.list(environment())
-  # }
+  ,holiday = function(type = c("regression", "randomwalk", "hierarchical"),
+                      holiday_lst = NULL) {
+     type <- match.arg(type)
+     as.list(environment())
+   }
   # ,xreg = function(..., lags = 1, standardize = "auto", type = NULL) {
   #   model_formula <- new_formula(
   #     lhs = NULL,
@@ -251,39 +251,39 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
 
   # HOLIDAYS ---------------------------------------------------------------------------------------
 
-  # if ("holiday" %in% names(specials)) {
-  #   holiday <- specials$holiday[[1]]
-  #   for (holiday in specials$holiday) {
-  #     holiday_type <- trimws(tolower(holiday$type))
-  #
-  #     if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
-  #       state <- bsts::AddRegressionHoliday(
-  #         state.specification = state,
-  #         y = vec_data,
-  #         holiday.list = holiday$holidays_list,
-  #         time0 = holiday$first_observation,
-  #         prior = holiday$prior)
-  #     } else if (holiday_type %in% c("randomwalk", "rw")) {
-  #       state <- bsts::AddRandomWalkHoliday(
-  #         state.specification = state,
-  #         y = vec_data,
-  #         holiday = holiday$holidays_list,
-  #         time0 = holiday$first_observation,
-  #         sigma.prior = holiday$sigma_prior,
-  #         initial.state.prior = holiday$initial_state_prior
-  #       )
-  #     } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
-  #       state <- bsts::AddHierarchicalRegressionHoliday(
-  #         state.specification = state,
-  #         y = vec_data,
-  #         holiday.list = holiday$holidays_list,
-  #         coefficient.mean.prior = holiday$coefficient_mean_prior,
-  #         coefficient.variance.prior = holiday$coefficient_variance_prior,
-  #         time0 = holiday$first_observation
-  #       )
-  #     }
-  #   }
-  # }
+  if ("holiday" %in% names(specials)) {
+    holiday <- specials$holiday[[1]]
+    for (holiday in specials$holiday) {
+      holiday_type <- trimws(tolower(holiday$type))
+
+      if (is_missing(holiday_type) || holiday_type %in% c("reg", "regression")) {
+        state <- bsts::AddRegressionHoliday(
+          state.specification = state,
+          y = vec_data,
+          holiday.list = holiday$holidays_list,
+          time0 = holiday$first_observation,
+          prior = holiday$prior)
+      } else if (holiday_type %in% c("randomwalk", "rw")) {
+        state <- bsts::AddRandomWalkHoliday(
+          state.specification = state,
+          y = vec_data,
+          holiday = holiday$holidays_list,
+          time0 = holiday$first_observation,
+          sigma.prior = holiday$sigma_prior,
+          initial.state.prior = holiday$initial_state_prior
+        )
+      } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
+        state <- bsts::AddHierarchicalRegressionHoliday(
+          state.specification = state,
+          y = vec_data,
+          holiday.list = holiday$holidays_list,
+          coefficient.mean.prior = holiday$coefficient_mean_prior,
+          coefficient.variance.prior = holiday$coefficient_variance_prior,
+          time0 = holiday$first_observation
+        )
+      }
+    }
+  }
 
 
   # EXOGENOUS REGRESSORS ---------------------------------------------------------------------------

@@ -47,7 +47,8 @@ mbl <-
     # ,bsts_seas_local = BSTS(trips ~ seasonal("1 week") + trend(), iterations = iterations)
     # ,bsts_semi_seas = BSTS(trips ~ seasonal("1 week") + trend("semilocal"), iterations = iterations)
     # ,bsts_trig = BSTS(trips ~ level() + trig(period = "1 week"), iterations = iterations)
-    ,bsts_cycle = BSTS(trips ~ cycle(), iterations = iterations)
+    # ,bsts_cycle = BSTS(trips ~ cycle(), iterations = iterations)
+    ,bsts_holiday = BSTS(trips ~ holiday())
     # ,bsts_broken = BSTS(trips ~ intercept() + ar() + level() + trend() + seasonal() + trig())
   )
 
