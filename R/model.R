@@ -264,14 +264,16 @@ train_bsts <- function(.data, specials, iterations = 1000, ...) {
           time0 = holiday$first_observation,
           prior = holiday$prior)
       } else if (holiday_type %in% c("randomwalk", "rw")) {
-        state <- bsts::AddRandomWalkHoliday(
-          state.specification = state,
-          y = vec_data,
-          holiday = holiday$holidays_list,
-          time0 = holiday$first_observation,
-          sigma.prior = holiday$sigma_prior,
-          initial.state.prior = holiday$initial_state_prior
-        )
+        for(i in length(holiday$holidays_list)){
+          state <- bsts::AddRandomWalkHoliday(
+            state.specification = state,
+            y = vec_data,
+            holiday = holiday$holidays_list[[i]],
+            time0 = holiday$first_observation,
+            sigma.prior = holiday$sigma_prior,
+            initial.state.prior = holiday$initial_state_prior
+          )
+        }
       } else if (holiday_type %in% c("hierarchical", "hierarchicalregression", "hr", "hreg")) {
         state <- bsts::AddHierarchicalRegressionHoliday(
           state.specification = state,
