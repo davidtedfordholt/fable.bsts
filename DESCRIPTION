@@ -27,9 +27,10 @@ ByteCompile: true
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE, roclets=c('rd', 'collate', 'namespace'))
 Language: en-GB
 URL: https://github.com/davidtedfordholt/fable.bsts
 BugReports: https://github.com/davidtedfordholt/fable.bsts/issues
 VignetteBuilder: knitr
+StagedInstall: no
