@@ -15,7 +15,6 @@ library(fable)
 library(fable.prophet)
 library(future)
 library(future.apply)
-library(slide)
 future::plan("multisession")
 tictoc::toc()
 
